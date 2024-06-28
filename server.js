@@ -8,6 +8,10 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'gaze.html'));
+});
+
 app.post('/save-gaze-data', (req, res) => {
     const data = req.body;
     fs.appendFile('gazeData.json', JSON.stringify(data) + '\n', (err) => {
