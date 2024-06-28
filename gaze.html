@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGazer.js Eye Tracking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Eye Tracking Demo</h1>
+        </header>
+        <main>
+            <section id="intro">
+                <p>Welcome to the Eye Tracking Demo using WebGazer.js. Please follow the instructions below to start the eye-tracking process.</p>
+            </section>
+            <section id="gaze-info">
+                <div id="gazeData"></div>
+                <video id="webcamVideo" autoplay></video>
+            </section>
+        </main>
+        <footer>
+            <p>&copy; 2024 AllGalaxy</p>
+        </footer>
+    </div>
+
+    <!-- Include WebGazer.js -->
+    <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
