@@ -1,5 +1,5 @@
 /* Reset some default styles */
-body, h1, p, div {
+body, h1, p, div, img, video {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -50,6 +50,18 @@ main {
     align-items: center;
 }
 
+#camera-frame, #image-frame {
+    margin: 20px 0;
+    padding: 10px;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+}
+
 #gazeData {
     padding: 10px;
     background-color: #eee;
@@ -62,11 +74,14 @@ main {
 }
 
 #webcamVideo {
-    width: 80%;
-    max-width: 600px;
+    width: 100%;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#demoImage {
+    width: 100%;
+    border-radius: 4px;
 }
 
 footer {

@@ -13,12 +13,18 @@
         </header>
         <main>
             <section id="intro">
-                <p>Welcome to the Eye Tracking Demo using WebGazer.js. Please follow the instructions below to start the eye-tracking process.</p>
+                <p>Welcome to the Eye Tracking Demo. Please follow the instructions below to start the eye-tracking process.</p>
+                <p>When prompted, look at the objects in the images shown below the camera feed. Your gaze patterns will be recorded for analysis.</p>
             </section>
             <section id="gaze-info">
-                <div id="gazeData"></div>
-                <video id="webcamVideo" autoplay></video>
+                <div id="camera-frame">
+                    <video id="webcamVideo" autoplay></video>
+                </div>
+                <div id="image-frame">
+                    <img id="demoImage" src="" alt="Demo Image">
+                </div>
             </section>
+            <div id="gazeData"></div>
         </main>
         <footer>
             <p>&copy; 2024 AllGalaxy</p>
