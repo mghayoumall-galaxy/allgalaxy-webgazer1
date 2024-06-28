@@ -20,16 +20,16 @@ window.onload = function() {
 
     // Display images and collect gaze data
     const images = [
-        'image1.jpg',
-        'image2.jpg',
-        'image3.jpg',
-        'image4.jpg',
-        'image5.jpg',
-        'image6.jpg',
-        'image7.jpg',
-        'image8.jpg',
-        'image9.jpg',
-        'image10.jpg'
+        'images/image1.jpg',
+        'images/image2.jpg',
+        'images/image3.jpg',
+        'images/image4.jpg',
+        'images/image5.jpg',
+        'images/image6.jpg',
+        'images/image7.jpg',
+        'images/image8.jpg',
+        'images/image9.jpg',
+        'images/image10.jpg'
     ];
 
     let currentImageIndex = 0;

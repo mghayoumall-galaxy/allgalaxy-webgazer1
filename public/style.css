@@ -25,13 +25,13 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 20px;
+    text-align: center;
 }
 
 header {
     background: #6200ea;
     color: #fff;
     padding: 20px;
-    text-align: center;
     width: 100%;
 }
 
@@ -42,7 +42,6 @@ header h1 {
 
 main {
     width: 100%;
-    text-align: center;
 }
 
 #intro {
@@ -53,6 +52,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
 }
 
 #camera-frame, #image-frame {
@@ -64,7 +64,6 @@ main {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 600px;
-    text-align: center;
 }
 
 #gazeData {
