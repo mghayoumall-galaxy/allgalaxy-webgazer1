@@ -1,9 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
+const { Pool } = require('pg');
 const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -12,13 +19,19 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'gaze.html'));
 });
 
-app.post('/save-gaze-data', (req, res) => {
+app.post('/save-gaze-data', async (req, res) => {
     const data = req.body;
-    fs.appendFile('gazeData.json', JSON.stringify(data) + '\n', (err) => {
-        if (err) throw err;
+    const query = 'INSERT INTO gaze_data (eye_x, eye_y, eye_width, eye_height, timestamp) VALUES ($1, $2, $3, $4, $5)';
+    try {
+        for (const entry of data) {
+            await pool.query(query, [entry.eyeX, entry.eyeY, entry.eyeWidth, entry.eyeHeight, entry.timestamp]);
+        }
         console.log('Gaze data saved!');
-    });
-    res.status(200).send('Data received');
+        res.status(200).send('Data received');
+    } catch (err) {
+        console.error('Error saving gaze data:', err);
+        res.status(500).send('Error saving data');
+    }
 });
 
 app.listen(port, () => {
