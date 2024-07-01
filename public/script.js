@@ -7,10 +7,13 @@ window.onload = function() {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function (stream) {
                 video.srcObject = stream;
+                console.log("Webcam access granted.");
             })
             .catch(function (error) {
                 console.log("Something went wrong with the webcam access!", error);
             });
+    } else {
+        console.log("getUserMedia not supported in this browser.");
     }
 
     // Image display logic
@@ -41,16 +44,17 @@ window.onload = function() {
 
     showNextImage();
 
-    // Basic face tracking with tracking.js
+    // Correctly initialize the ObjectTracker
     const tracker = new tracking.ObjectTracker('face');
     let gazeData = [];
 
     tracker.on('track', function(event) {
+        console.log("Tracking event triggered.");
         if (event.data.length === 0) {
-            // No faces were detected in this frame.
+            console.log("No faces detected.");
         } else {
             event.data.forEach(function(rect) {
-                console.log(rect.x, rect.y, rect.width, rect.height);
+                console.log(`Face detected at X: ${rect.x}, Y: ${rect.y}, Width: ${rect.width}, Height: ${rect.height}`);
                 // Approximate eye region detection
                 const eyeX = rect.x + rect.width / 4;
                 const eyeY = rect.y + rect.height / 4;
