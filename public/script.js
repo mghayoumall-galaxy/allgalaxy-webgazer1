@@ -1,24 +1,19 @@
-window.onload = async function() {
-    await webgazer.setRegression('ridge')
-        .setTracker('clmtrackr')
-        .begin()
-        .showVideoPreview(true)
-        .showPredictionPoints(true)
-        .applyKalmanFilter(true);
+window.onload = function() {
+    const video = document.getElementById('webcamVideo');
+    const demoImage = document.getElementById('demoImage');
 
-    webgazer.setGazeListener(function(data, elapsedTime) {
-        if (data == null) {
-            return;
-        }
-        var xprediction = data.x;
-        var yprediction = data.y;
-        document.getElementById('gazeData').innerHTML = 'X: ' + xprediction + ' Y: ' + yprediction;
+    // Get access to the user's webcam
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                video.srcObject = stream;
+            })
+            .catch(function (error) {
+                console.log("Something went wrong with the webcam access!");
+            });
+    }
 
-        // Send gaze data to the server
-        saveGazeData({ x: xprediction, y: yprediction, time: elapsedTime });
-    }).begin();
-
-    // Display images and collect gaze data
+    // Image display logic
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -33,7 +28,6 @@ window.onload = async function() {
     ];
 
     let currentImageIndex = 0;
-    const demoImage = document.getElementById('demoImage');
 
     function showNextImage() {
         if (currentImageIndex < images.length) {
@@ -47,13 +41,3 @@ window.onload = async function() {
 
     showNextImage();
 };
-
-function saveGazeData(data) {
-    fetch('/save-gaze-data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    });
-}
