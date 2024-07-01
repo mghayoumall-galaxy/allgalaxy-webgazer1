@@ -1,30 +1,26 @@
-window.onload = function() {
-    webgazer.setRegression('ridge')
-        .setTracker('clmtrackr')
-        .begin()
-        .showVideoPreview(true)
-        .showPredictionPoints(true)
-        .applyKalmanFilter(true);
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+const app = express();
+const port = process.env.PORT || 3000;
 
-    webgazer.setGazeListener(function(data, elapsedTime) {
-        if (data == null) {
-            return;
-        }
-        var xprediction = data.x;
-        var yprediction = data.y;
-        document.getElementById('gazeData').innerHTML = 'X: ' + xprediction + ' Y: ' + yprediction;
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-        // Send gaze data to the server
-        saveGazeData({ x: xprediction, y: yprediction, time: elapsedTime });
-    }).begin();
-};
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'gaze.html'));
+});
 
-function saveGazeData(data) {
-    fetch('/save-gaze-data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+app.post('/save-gaze-data', (req, res) => {
+    const data = req.body;
+    fs.appendFile('gazeData.json', JSON.stringify(data) + '\n', (err) => {
+        if (err) throw err;
+        console.log('Gaze data saved!');
     });
-}
+    res.status(200).send('Data received');
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
