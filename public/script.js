@@ -43,6 +43,7 @@ window.onload = function() {
 
     // Basic face tracking with tracking.js
     const tracker = new tracking.ObjectTracker('face');
+    let gazeData = [];
 
     tracker.on('track', function(event) {
         if (event.data.length === 0) {
@@ -55,10 +56,31 @@ window.onload = function() {
                 const eyeY = rect.y + rect.height / 4;
                 const eyeWidth = rect.width / 2;
                 const eyeHeight = rect.height / 4;
+                const timestamp = Date.now();
+                gazeData.push({ eyeX, eyeY, eyeWidth, eyeHeight, timestamp });
                 document.getElementById('gazeData').innerText = `Eye region detected at: X ${eyeX}, Y ${eyeY}`;
             });
         }
     });
 
     tracking.track(video, tracker);
+
+    window.addEventListener('beforeunload', function() {
+        // Save gaze data to the server
+        fetch('/save-gaze-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gazeData)
+        }).then(response => {
+            if (response.ok) {
+                console.log('Gaze data saved successfully.');
+            } else {
+                console.log('Failed to save gaze data.');
+            }
+        }).catch(error => {
+            console.log('Error saving gaze data:', error);
+        });
+    });
 };
