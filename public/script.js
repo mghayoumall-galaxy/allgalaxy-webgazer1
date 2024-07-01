@@ -9,7 +9,7 @@ window.onload = function() {
                 video.srcObject = stream;
             })
             .catch(function (error) {
-                console.log("Something went wrong with the webcam access!");
+                console.log("Something went wrong with the webcam access!", error);
             });
     }
 
@@ -40,4 +40,25 @@ window.onload = function() {
     }
 
     showNextImage();
+
+    // Basic face tracking with tracking.js
+    const tracker = new tracking.ObjectTracker('face');
+
+    tracker.on('track', function(event) {
+        if (event.data.length === 0) {
+            // No faces were detected in this frame.
+        } else {
+            event.data.forEach(function(rect) {
+                console.log(rect.x, rect.y, rect.width, rect.height);
+                // Approximate eye region detection
+                const eyeX = rect.x + rect.width / 4;
+                const eyeY = rect.y + rect.height / 4;
+                const eyeWidth = rect.width / 2;
+                const eyeHeight = rect.height / 4;
+                document.getElementById('gazeData').innerText = `Eye region detected at: X ${eyeX}, Y ${eyeY}`;
+            });
+        }
+    });
+
+    tracking.track(video, tracker);
 };
