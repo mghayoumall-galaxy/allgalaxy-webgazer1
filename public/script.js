@@ -1,20 +1,5 @@
 window.onload = function() {
-    const video = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
-
-    // Get access to the user's webcam
-    if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-                video.srcObject = stream;
-                console.log("Webcam access granted.");
-            })
-            .catch(function (error) {
-                console.log("Something went wrong with the webcam access!", error);
-            });
-    } else {
-        console.log("getUserMedia not supported in this browser.");
-    }
 
     // Image display logic
     const images = [
@@ -60,6 +45,10 @@ window.onload = function() {
         gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
     }).begin();
 
+    // Set up the camera feed for WebGazer
+    webgazer.showVideo(true).showPredictionPoints(true).applyKalmanFilter(true);
+
+    // Handle data saving
     window.addEventListener('beforeunload', function() {
         fetch('/save-gaze-data', {
             method: 'POST',
