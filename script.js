@@ -46,7 +46,7 @@ window.onload = function() {
     }).begin();
 
     // Set up the camera feed for WebGazer
-    webgazer.showVideo(true).showPredictionPoints(true).applyKalmanFilter(true);
+    webgazer.showVideoPreview(true).showPredictionPoints(true).applyKalmanFilter(true);
 
     // Handle data saving
     window.addEventListener('beforeunload', function() {
