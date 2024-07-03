@@ -44,33 +44,21 @@ window.onload = function() {
 
     showNextImage();
 
-    // Correctly initialize the ObjectTracker
-    const tracker = new tracking.ObjectTracker('face');
+    // Initialize WebGazer for eye tracking
+    webgazer.setGazeListener(function(data, elapsedTime) {
+        if (data == null) {
+            return;
+        }
+        const x = data.x; // x coordinate of the gaze
+        const y = data.y; // y coordinate of the gaze
+        console.log(`Gaze coordinates: (${x}, ${y})`);
+        document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+    }).begin();
+
+    // Saving gaze data
     let gazeData = [];
 
-    tracker.on('track', function(event) {
-        console.log("Tracking event triggered.");
-        if (event.data.length === 0) {
-            console.log("No faces detected.");
-        } else {
-            event.data.forEach(function(rect) {
-                console.log(`Face detected at X: ${rect.x}, Y: ${rect.y}, Width: ${rect.width}, Height: ${rect.height}`);
-                // Approximate eye region detection
-                const eyeX = rect.x + rect.width / 4;
-                const eyeY = rect.y + rect.height / 4;
-                const eyeWidth = rect.width / 2;
-                const eyeHeight = rect.height / 4;
-                const timestamp = Date.now();
-                gazeData.push({ eyeX, eyeY, eyeWidth, eyeHeight, timestamp });
-                document.getElementById('gazeData').innerText = `Eye region detected at: X ${eyeX}, Y ${eyeY}`;
-            });
-        }
-    });
-
-    tracking.track(video, tracker);
-
     window.addEventListener('beforeunload', function() {
-        // Save gaze data to the server
         fetch('/save-gaze-data', {
             method: 'POST',
             headers: {
