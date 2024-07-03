@@ -45,6 +45,7 @@ window.onload = function() {
     showNextImage();
 
     // Initialize WebGazer for eye tracking
+    let gazeData = [];
     webgazer.setGazeListener(function(data, elapsedTime) {
         if (data == null) {
             return;
@@ -53,10 +54,11 @@ window.onload = function() {
         const y = data.y; // y coordinate of the gaze
         console.log(`Gaze coordinates: (${x}, ${y})`);
         document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+        
+        // Save gaze data
+        const timestamp = Date.now();
+        gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
     }).begin();
-
-    // Saving gaze data
-    let gazeData = [];
 
     window.addEventListener('beforeunload', function() {
         fetch('/save-gaze-data', {

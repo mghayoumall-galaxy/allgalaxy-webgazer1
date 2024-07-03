@@ -21,10 +21,10 @@ app.get('/', (req, res) => {
 
 app.post('/save-gaze-data', async (req, res) => {
     const data = req.body;
-    const query = 'INSERT INTO gaze_data (eye_x, eye_y, eye_width, eye_height, timestamp) VALUES ($1, $2, $3, $4, $5)';
+    const query = 'INSERT INTO gaze_data (eye_x, eye_y, timestamp) VALUES ($1, $2, $3)';
     try {
         for (const entry of data) {
-            await pool.query(query, [entry.eyeX, entry.eyeY, entry.eyeWidth, entry.eyeHeight, entry.timestamp]);
+            await pool.query(query, [entry.eyeX, entry.eyeY, entry.timestamp]);
         }
         console.log('Gaze data saved!');
         res.status(200).send('Data received');
