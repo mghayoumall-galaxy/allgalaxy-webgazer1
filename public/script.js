@@ -45,6 +45,7 @@ window.onload = function() {
     showNextImage();
 
     // Initialize WebGazer for eye tracking
+    let gazeData = [];
     webgazer.setGazeListener(function(data, elapsedTime) {
         if (data == null) {
             return;
@@ -58,9 +59,6 @@ window.onload = function() {
         const timestamp = Date.now();
         gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
     }).begin();
-
-    // Saving gaze data
-    let gazeData = [];
 
     window.addEventListener('beforeunload', function() {
         fetch('/save-gaze-data', {
