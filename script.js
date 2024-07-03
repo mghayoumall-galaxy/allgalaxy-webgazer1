@@ -46,7 +46,14 @@ window.onload = function() {
     }).begin();
 
     // Set up the camera feed for WebGazer
-    webgazer.showVideoPreview(true).showPredictionPoints(true).applyKalmanFilter(true);
+    webgazer.showVideo(true).showPredictionPoints(true).applyKalmanFilter(true);
+
+    // Adjust the video element position
+    const videoElement = document.getElementById('webcamVideo');
+    videoElement.style.position = 'absolute';
+    videoElement.style.top = '50%';
+    videoElement.style.left = '50%';
+    videoElement.style.transform = 'translate(-50%, -50%)';
 
     // Handle data saving
     window.addEventListener('beforeunload', function() {
