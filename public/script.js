@@ -29,41 +29,79 @@ window.onload = function() {
 
     showNextImage();
 
-    // Initialize WebGazer for eye tracking
-    let gazeData = [];
-    webgazer.setGazeListener(function(data, elapsedTime) {
-        if (data == null) {
-            return;
-        }
-        const x = data.x; // x coordinate of the gaze
-        const y = data.y; // y coordinate of the gaze
-        console.log(`Gaze coordinates: (${x}, ${y})`);
-        document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-        
-        // Save gaze data
-        const timestamp = Date.now();
-        gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
-    }).begin();
+    // Function to get the second camera device ID
+    function getSecondCamera() {
+        return navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                if (videoDevices.length < 2) {
+                    throw new Error('Second camera not found');
+                }
+                return videoDevices[1].deviceId; // Select the second camera
+            });
+    }
 
-    // Set up the camera feed for WebGazer
-    webgazer.showVideo(true).showPredictionPoints(true).applyKalmanFilter(true);
+    // Function to initialize WebGazer with the selected camera
+    function initializeWebGazer(cameraDeviceId) {
+        webgazer.setGazeListener(function(data, elapsedTime) {
+            if (data == null) {
+                return;
+            }
+            const x = data.x; // x coordinate of the gaze
+            const y = data.y; // y coordinate of the gaze
+            console.log(`Gaze coordinates: (${x}, ${y})`);
+            document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+            
+            // Save gaze data
+            const timestamp = Date.now();
+            gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
+        }).begin();
+
+        const constraints = {
+            video: {
+                deviceId: cameraDeviceId ? { exact: cameraDeviceId } : undefined
+            }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                const videoElement = document.getElementById('webcamVideo');
+                videoElement.srcObject = stream;
+                videoElement.play();
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+            });
+
+        webgazer.showVideoPreview(true).applyKalmanFilter(true);
+    }
+
+    // Initialize WebGazer with the second camera
+    getSecondCamera().then(deviceId => {
+        initializeWebGazer(deviceId);
+    }).catch(error => {
+        console.error(error.message);
+    });
 
     // Handle data saving
+    let gazeData = [];
     window.addEventListener('beforeunload', function() {
-        fetch('/save-gaze-data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(gazeData)
-        }).then(response => {
-            if (response.ok) {
-                console.log('Gaze data saved successfully.');
-            } else {
-                console.log('Failed to save gaze data.');
-            }
-        }).catch(error => {
-            console.log('Error saving gaze data:', error);
-        });
+        if (gazeData.length > 0) {
+            fetch('/save-gaze-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gazeData)
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Gaze data saved successfully.');
+                } else {
+                    console.log('Failed to save gaze data.');
+                }
+            }).catch(error => {
+                console.log('Error saving gaze data:', error);
+            });
+        }
     });
 };
