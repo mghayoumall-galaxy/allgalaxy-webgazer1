@@ -18,10 +18,10 @@
             </section>
             <section id="gaze-info">
                 <div id="camera-frame">
-                    <video id="webcamVideo" autoplay></video>
+                    <video id="webcamVideo" autoplay playsinline></video> <!-- Added playsinline attribute for better mobile support -->
                 </div>
                 <div id="image-frame">
-                    <img id="demoImage" src="" alt="Demo Image">
+                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image"> <!-- Set initial src for the image -->
                 </div>
             </section>
             <div id="gazeData"></div>
@@ -31,8 +31,9 @@
         </footer>
     </div>
 
+    <!-- Ensure scripts are loaded at the end of the body for better page load performance -->
     <!-- Include WebGazer.js -->
     <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js" defer></script> <!-- Defer script.js to ensure it loads after the DOM is ready -->
 </body>
 </html>

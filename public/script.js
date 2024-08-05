@@ -1,4 +1,5 @@
 window.onload = function() {
+    const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
     const images = [
         'images/image1.jpg',
@@ -17,61 +18,52 @@ window.onload = function() {
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Show each image for 5 seconds
+            setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
+            currentImageIndex = 0; // Reset index to loop images
+            showNextImage(); // Start the cycle again if needed
         }
     }
 
     showNextImage();
 
-    const videoElement = document.getElementById('webcamVideo');
-    const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f'; // Your USB Camera's Device ID
+    // Your specified USB camera's device ID
+    const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f';
 
-    const constraints = {
-        video: {
-            deviceId: { exact: cameraDeviceId }
-        }
-    };
+    function setupCamera(deviceId) {
+        const constraints = {
+            video: { deviceId: { exact: deviceId } }
+        };
 
-    // Attempt to get the media stream using the specified device ID
-    navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-            videoElement.srcObject = stream;
-            videoElement.play();
-            console.log('Using USB camera with ID:', cameraDeviceId);
-            setupWebGazer();
-        })
-        .catch(error => {
-            console.error('Error accessing USB camera:', error);
-        });
-
-    function setupWebGazer() {
-        // Assuming webgazer has already been loaded and configured in your project
-        webgazer.setGazeListener(function(data, elapsedTime) {
-            if (data == null) return;
-
-            const x = data.x;
-            const y = data.y;
-            console.log(`Gaze coordinates: (${x}, ${y})`);
-            document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-            
-            // Optionally, push this data to an array or handle it as needed
-        }).begin();
-
-        webgazer.showVideoPreview(true).applyKalmanFilter(true);
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                console.log('Camera is now active with the specified device ID.');
+            })
+            .catch(error => {
+                console.error('Error accessing the specified camera:', error);
+                fallbackToDefaultCamera();
+            });
     }
 
-    // Add an event listener to save gaze data when the page is unloaded
-    let gazeData = [];
-    window.addEventListener('beforeunload', function() {
-        if (gazeData.length > 0) {
-            fetch('/save-gaze-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(gazeData)
-            }).then(response => console.log('Gaze data saved:', response.ok))
-            .catch(console.error);
-        }
-    });
+    function fallbackToDefaultCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                console.log('Fallback to default camera successful.');
+            })
+            .catch(error => {
+                console.error('Error accessing any camera:', error);
+            });
+    }
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        setupCamera(cameraDeviceId);
+    } else {
+        console.error('Browser API navigator.mediaDevices.getUserMedia not available');
+        fallbackToDefaultCamera();
+    }
 };
