@@ -24,7 +24,7 @@ window.onload = function() {
             setTimeout(showNextImage, 5000); // Display each image for 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0; // Restart the cycle
+            currentImageIndex = 0; // Optionally restart the cycle
             showNextImage();
         }
     }
@@ -44,46 +44,23 @@ window.onload = function() {
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
     }
 
-    function setupCamera(deviceId) {
+    function setupCamera() {
         const constraints = {
-            video: { deviceId: { exact: deviceId } }
+            video: {
+                deviceId: { exact: '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884' } // Your specific device ID here
+            }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 videoElement.srcObject = stream;
                 videoElement.play();
-                console.log('Camera is now active with the specified device ID.');
-                setupWebGazer();
+                console.log('Camera is now active.');
+                setupWebGazer(); // Initialize WebGazer after confirming camera is active
             })
             .catch(error => {
-                console.error('Error accessing camera with specified device ID:', error);
-                alert('Unable to access the specified camera. Please ensure the device ID is correct and that permissions are granted.');
-            });
-    }
-
-    function enumerateDevicesAndSetupCamera() {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                console.log('Enumerating devices:');
-                devices.forEach(device => {
-                    console.log(`${device.kind}: ${device.label} (ID: ${device.deviceId})`);
-                });
-
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                if (videoDevices.length === 0) {
-                    console.error('No cameras found.');
-                    alert('No cameras found. Ensure the camera is connected and recognized by the system.');
-                    return;
-                }
-
-                // Use the provided device ID or default to the first camera if only one is found
-                const cameraDeviceId = videoDevices.length > 1 ? '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884' : videoDevices[0].deviceId;
-                setupCamera(cameraDeviceId);
-            })
-            .catch(error => {
-                console.error('Error enumerating devices:', error);
-                alert('Error enumerating devices: ' + error.message);
+                console.error('Error accessing camera:', error);
+                alert('Unable to access the specified camera. Please ensure the device ID is correct and permissions are granted.');
             });
     }
 
@@ -103,7 +80,6 @@ window.onload = function() {
         }
     });
 
-    // Start the image display cycle and attempt to initialize the camera
     showNextImage();
-    enumerateDevicesAndSetupCamera(); // Enumerate devices and setup the camera
+    setupCamera(); // Attempt to initialize the camera
 };
