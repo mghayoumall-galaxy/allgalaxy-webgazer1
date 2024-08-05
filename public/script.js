@@ -14,6 +14,7 @@ window.onload = function() {
         'images/image9.jpg',
         'images/image10.jpg'
     ];
+
     let currentImageIndex = 0;
     let gazeData = [];
 
