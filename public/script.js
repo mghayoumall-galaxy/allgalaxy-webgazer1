@@ -18,7 +18,6 @@ window.onload = function() {
     let currentImageIndex = 0;
     let gazeData = [];
 
-    // Function to display images in sequence
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
@@ -30,7 +29,6 @@ window.onload = function() {
         }
     }
 
-    // Function to initialize WebGazer
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
@@ -46,7 +44,6 @@ window.onload = function() {
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
     }
 
-    // Function to setup the camera using the known device ID
     function setupCamera() {
         const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f'; // Known device ID of the second camera
         const constraints = {
@@ -66,7 +63,6 @@ window.onload = function() {
             });
     }
 
-    // Save gaze data before the window unloads
     window.addEventListener('beforeunload', function() {
         if (gazeData.length > 0) {
             fetch('/save-gaze-data', {
