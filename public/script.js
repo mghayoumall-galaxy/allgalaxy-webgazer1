@@ -44,10 +44,9 @@ window.onload = function() {
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
     }
 
-    function setupCamera() {
-        const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f'; // Known device ID of the second camera
+    function setupCamera(deviceId) {
         const constraints = {
-            video: { deviceId: { exact: cameraDeviceId } }
+            video: { deviceId: { exact: deviceId } }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
@@ -60,6 +59,29 @@ window.onload = function() {
             .catch(error => {
                 console.error('Error accessing camera with specified device ID:', error);
                 alert('Unable to access the specified camera.');
+            });
+    }
+
+    function enumerateDevicesAndSetupCamera() {
+        navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                devices.forEach(device => {
+                    console.log(`${device.kind}: ${device.label} (ID: ${device.deviceId})`);
+                });
+
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                if (videoDevices.length < 2) {
+                    alert('Second camera not found');
+                    console.error('Second camera not found');
+                    return;
+                }
+
+                const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f'; // Known device ID
+                setupCamera(cameraDeviceId);
+            })
+            .catch(error => {
+                console.error('Error enumerating devices:', error);
+                alert('Error enumerating devices: ' + error.message);
             });
     }
 
@@ -80,5 +102,5 @@ window.onload = function() {
     });
 
     showNextImage();
-    setupCamera(); // Initialize camera with the second camera's device ID
+    enumerateDevicesAndSetupCamera(); // Enumerate devices and setup the camera
 };
