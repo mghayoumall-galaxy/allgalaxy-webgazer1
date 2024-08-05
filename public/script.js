@@ -34,30 +34,17 @@ window.onload = function() {
         return navigator.mediaDevices.enumerateDevices()
             .then(devices => {
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                console.log('Video Devices:', videoDevices); // Debug: List all video devices
+                console.log('All Devices:', devices); // Log all devices
+                console.log('Video Devices:', videoDevices); // Log video devices
                 if (videoDevices.length < 2) {
                     throw new Error('Second camera not found');
                 }
-                return videoDevices[1].deviceId; // Select the second camera
+                return videoDevices[1].deviceId; // Return the device ID of the second camera
             });
     }
 
     // Function to initialize WebGazer with the selected camera
     function initializeWebGazer(cameraDeviceId) {
-        webgazer.setGazeListener(function(data, elapsedTime) {
-            if (data == null) {
-                return;
-            }
-            const x = data.x; // x coordinate of the gaze
-            const y = data.y; // y coordinate of the gaze
-            console.log(`Gaze coordinates: (${x}, ${y})`);
-            document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-            
-            // Save gaze data
-            const timestamp = Date.now();
-            gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
-        }).begin();
-
         const constraints = {
             video: {
                 deviceId: cameraDeviceId ? { exact: cameraDeviceId } : undefined
@@ -69,17 +56,29 @@ window.onload = function() {
                 const videoElement = document.getElementById('webcamVideo');
                 videoElement.srcObject = stream;
                 videoElement.play();
+                webgazer.setGazeListener(function(data, elapsedTime) {
+                    if (data == null) {
+                        return;
+                    }
+                    const x = data.x; // x coordinate of the gaze
+                    const y = data.y; // y coordinate of the gaze
+                    console.log(`Gaze coordinates: (${x}, ${y})`);
+                    document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+                    
+                    // Save gaze data
+                    const timestamp = Date.now();
+                    gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
+                }).begin();
+                webgazer.showVideoPreview(true).applyKalmanFilter(true);
             })
             .catch(error => {
                 console.error('Error accessing camera:', error);
             });
-
-        webgazer.showVideoPreview(true).applyKalmanFilter(true);
     }
 
-    // Initialize WebGazer with the second camera
+    // Get second camera device ID and initialize WebGazer
     getSecondCamera().then(deviceId => {
-        console.log('Second Camera Device ID:', deviceId); // Debug: Confirm device ID
+        console.log('Second Camera Device ID:', deviceId); // Log the device ID of the second camera
         initializeWebGazer(deviceId);
     }).catch(error => {
         console.error(error.message);
