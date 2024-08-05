@@ -1,7 +1,5 @@
 window.onload = function() {
     const demoImage = document.getElementById('demoImage');
-
-    // Image display logic
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -19,17 +17,15 @@ window.onload = function() {
 
     function showNextImage() {
         if (currentImageIndex < images.length) {
-            demoImage.src = images[currentImageIndex];
-            currentImageIndex++;
+            demoImage.src = images[currentImageIndex++];
             setTimeout(showNextImage, 5000); // Show each image for 5 seconds
         } else {
-            alert('Image display complete. Gaze data collection finished.');
+            console.log('Image display complete. Gaze data collection finished.');
         }
     }
 
     showNextImage();
 
-    // Function to get the second camera device ID
     function getSecondCamera() {
         return navigator.mediaDevices.enumerateDevices()
             .then(devices => {
@@ -43,11 +39,10 @@ window.onload = function() {
             });
     }
 
-    // Function to initialize WebGazer with the selected camera
     function initializeWebGazer(cameraDeviceId) {
         const constraints = {
             video: {
-                deviceId: cameraDeviceId ? { exact: cameraDeviceId } : undefined
+                deviceId: { exact: cameraDeviceId }
             }
         };
 
@@ -56,53 +51,47 @@ window.onload = function() {
                 const videoElement = document.getElementById('webcamVideo');
                 videoElement.srcObject = stream;
                 videoElement.play();
-                webgazer.setGazeListener(function(data, elapsedTime) {
-                    if (data == null) {
-                        return;
-                    }
-                    const x = data.x; // x coordinate of the gaze
-                    const y = data.y; // y coordinate of the gaze
-                    console.log(`Gaze coordinates: (${x}, ${y})`);
-                    document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-                    
-                    // Save gaze data
-                    const timestamp = Date.now();
-                    gazeData.push({ eyeX: x, eyeY: y, timestamp: timestamp });
-                }).begin();
-                webgazer.showVideoPreview(true).applyKalmanFilter(true);
+                setupWebGazer();
             })
             .catch(error => {
                 console.error('Error accessing camera:', error);
             });
     }
 
-    // Get second camera device ID and initialize WebGazer
+    function setupWebGazer() {
+        webgazer.setGazeListener(function(data, elapsedTime) {
+            if (data == null) return;
+
+            const x = data.x; // x coordinate of the gaze
+            const y = data.y; // y coordinate of the gaze
+            console.log(`Gaze coordinates: (${x}, ${y})`);
+            document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+            
+            gazeData.push({
+                eyeX: x,
+                eyeY: y,
+                timestamp: Date.now()
+            });
+        }).begin();
+
+        webgazer.showVideoPreview(true).applyKalmanFilter(true);
+    }
+
     getSecondCamera().then(deviceId => {
         console.log('Second Camera Device ID:', deviceId); // Log the device ID of the second camera
         initializeWebGazer(deviceId);
-    }).catch(error => {
-        console.error(error.message);
-    });
+    }).catch(console.error);
 
-    // Handle data saving
     let gazeData = [];
     window.addEventListener('beforeunload', function() {
         if (gazeData.length > 0) {
             fetch('/save-gaze-data', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(gazeData)
-            }).then(response => {
-                if (response.ok) {
-                    console.log('Gaze data saved successfully.');
-                } else {
-                    console.log('Failed to save gaze data.');
-                }
-            }).catch(error => {
-                console.log('Error saving gaze data:', error);
-            });
+            })
+            .then(response => console.log('Gaze data saved:', response.ok))
+            .catch(console.error);
         }
     });
 };
