@@ -14,7 +14,6 @@ window.onload = function() {
     ];
 
     let currentImageIndex = 0;
-
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
@@ -35,7 +34,8 @@ window.onload = function() {
                 if (videoDevices.length < 2) {
                     throw new Error('Second camera not found');
                 }
-                return videoDevices[1].deviceId; // Return the device ID of the second camera
+                // Replace with your USB camera's device ID
+                return '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f'; 
             });
     }
 
@@ -62,11 +62,11 @@ window.onload = function() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data == null) return;
 
-            const x = data.x; // x coordinate of the gaze
-            const y = data.y; // y coordinate of the gaze
+            const x = data.x;
+            const y = data.y;
             console.log(`Gaze coordinates: (${x}, ${y})`);
             document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-            
+
             gazeData.push({
                 eyeX: x,
                 eyeY: y,
@@ -78,7 +78,7 @@ window.onload = function() {
     }
 
     getSecondCamera().then(deviceId => {
-        console.log('Second Camera Device ID:', deviceId); // Log the device ID of the second camera
+        console.log('Second Camera Device ID:', deviceId);
         initializeWebGazer(deviceId);
     }).catch(console.error);
 
