@@ -1,6 +1,6 @@
 window.onload = function() {
-    const demoImage = document.getElementById('demoImage');
     const videoElement = document.getElementById('webcamVideo');
+    const demoImage = document.getElementById('demoImage');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -28,22 +28,18 @@ window.onload = function() {
 
     function setupCamera(deviceId) {
         const constraints = {
-            video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+            video: { deviceId: { exact: deviceId } }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 videoElement.srcObject = stream;
                 videoElement.play();
+                console.log('Camera is now active with the specified device ID.');
                 setupWebGazer();
             }).catch(error => {
                 console.error('Error accessing camera with ID ' + deviceId + ':', error);
-                if (deviceId) {
-                    console.log('Attempting to access default camera.');
-                    setupCamera(); // Attempt without deviceId if specific camera fails
-                } else {
-                    alert('Unable to access any camera.');
-                }
+                alert('Unable to access the specified camera.');
             });
     }
 
@@ -57,23 +53,6 @@ window.onload = function() {
                 gazeData.push({ eyeX: x, eyeY: y, timestamp: Date.now() });
             }
         }).begin();
-    }
-
-    function fetchCameraDevices() {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                if (videoDevices.length > 1) {
-                    return videoDevices[1].deviceId; // Try to use the second camera
-                } else if (videoDevices.length === 1) {
-                    return videoDevices[0].deviceId; // Fallback to the first camera if only one is available
-                } else {
-                    throw new Error('No cameras found');
-                }
-            }).then(setupCamera).catch(error => {
-                console.error('Failed to get cameras:', error);
-                alert('No accessible cameras were found.');
-            });
     }
 
     function saveGazeData() {
@@ -92,5 +71,7 @@ window.onload = function() {
 
     window.addEventListener('beforeunload', saveGazeData);
     showNextImage();
-    fetchCameraDevices();
+    
+    // Directly use the known device ID of your USB camera
+    setupCamera('47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f');
 };
