@@ -58,21 +58,22 @@ window.onload = function() {
             })
             .catch(error => {
                 console.error('Error accessing camera with specified device ID:', error);
-                alert('Unable to access the specified camera.');
+                alert('Unable to access the specified camera. Please ensure the device ID is correct and that permissions are granted.');
             });
     }
 
     function enumerateDevicesAndSetupCamera() {
         navigator.mediaDevices.enumerateDevices()
             .then(devices => {
+                console.log('Enumerating devices:');
                 devices.forEach(device => {
                     console.log(`${device.kind}: ${device.label} (ID: ${device.deviceId})`);
                 });
 
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
                 if (videoDevices.length < 2) {
-                    alert('Second camera not found');
                     console.error('Second camera not found');
+                    alert('Second camera not found. Ensure the camera is connected and recognized by the system.');
                     return;
                 }
 
