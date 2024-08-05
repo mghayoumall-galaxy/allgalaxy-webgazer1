@@ -34,6 +34,7 @@ window.onload = function() {
         return navigator.mediaDevices.enumerateDevices()
             .then(devices => {
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                console.log('Video Devices:', videoDevices); // Debug: List all video devices
                 if (videoDevices.length < 2) {
                     throw new Error('Second camera not found');
                 }
@@ -78,6 +79,7 @@ window.onload = function() {
 
     // Initialize WebGazer with the second camera
     getSecondCamera().then(deviceId => {
+        console.log('Second Camera Device ID:', deviceId); // Debug: Confirm device ID
         initializeWebGazer(deviceId);
     }).catch(error => {
         console.error(error.message);
