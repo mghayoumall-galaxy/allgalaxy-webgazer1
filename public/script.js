@@ -1,6 +1,6 @@
 window.onload = function() {
-    const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
+    const videoElement = document.getElementById('webcamVideo');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -13,57 +13,84 @@ window.onload = function() {
         'images/image9.jpg',
         'images/image10.jpg'
     ];
-
     let currentImageIndex = 0;
+    let gazeData = [];
+
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
+            setTimeout(showNextImage, 5000);
         } else {
-            console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0; // Reset index to loop images
-            showNextImage(); // Start the cycle again if needed
+            alert('Image display complete. Gaze data collection finished.');
+            currentImageIndex = 0; // Optionally restart the cycle
         }
     }
 
-    showNextImage();
-
-    // Your specified USB camera's device ID
-    const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f';
-
     function setupCamera(deviceId) {
         const constraints = {
-            video: { deviceId: { exact: deviceId } }
+            video: { deviceId: deviceId ? { exact: deviceId } : undefined }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 videoElement.srcObject = stream;
                 videoElement.play();
-                console.log('Camera is now active with the specified device ID.');
-            })
-            .catch(error => {
-                console.error('Error accessing the specified camera:', error);
-                fallbackToDefaultCamera();
+                setupWebGazer();
+            }).catch(error => {
+                console.error('Error accessing camera with ID ' + deviceId + ':', error);
+                if (deviceId) {
+                    console.log('Attempting to access default camera.');
+                    setupCamera(); // Attempt without deviceId if specific camera fails
+                } else {
+                    alert('Unable to access any camera.');
+                }
             });
     }
 
-    function fallbackToDefaultCamera() {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                console.log('Fallback to default camera successful.');
-            })
-            .catch(error => {
-                console.error('Error accessing any camera:', error);
+    function setupWebGazer() {
+        webgazer.setGazeListener(function(data, elapsedTime) {
+            if (data) {
+                const x = data.x;
+                const y = data.y;
+                console.log(`Gaze coordinates: (${x}, ${y})`);
+                document.getElementById('gazeData').innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+                gazeData.push({ eyeX: x, eyeY: y, timestamp: Date.now() });
+            }
+        }).begin();
+    }
+
+    function fetchCameraDevices() {
+        navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                if (videoDevices.length > 1) {
+                    return videoDevices[1].deviceId; // Try to use the second camera
+                } else if (videoDevices.length === 1) {
+                    return videoDevices[0].deviceId; // Fallback to the first camera if only one is available
+                } else {
+                    throw new Error('No cameras found');
+                }
+            }).then(setupCamera).catch(error => {
+                console.error('Failed to get cameras:', error);
+                alert('No accessible cameras were found.');
             });
     }
 
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        setupCamera(cameraDeviceId);
-    } else {
-        console.error('Browser API navigator.mediaDevices.getUserMedia not available');
-        fallbackToDefaultCamera();
+    function saveGazeData() {
+        if (gazeData.length > 0) {
+            fetch('/save-gaze-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gazeData)
+            }).then(response => {
+                console.log('Gaze data saved:', response.ok);
+            }).catch(error => {
+                console.log('Error saving gaze data:', error);
+            });
+        }
     }
+
+    window.addEventListener('beforeunload', saveGazeData);
+    showNextImage();
+    fetchCameraDevices();
 };
