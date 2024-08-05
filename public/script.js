@@ -28,7 +28,7 @@ window.onload = function() {
 
     function setupCamera(deviceId) {
         const constraints = {
-            video: { deviceId: { exact: deviceId } }
+            video: { deviceId: deviceId ? { exact: deviceId } : undefined }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
@@ -39,7 +39,8 @@ window.onload = function() {
                 setupWebGazer();
             }).catch(error => {
                 console.error('Error accessing camera with ID ' + deviceId + ':', error);
-                alert('Unable to access the specified camera.');
+                alert('Unable to access the specified camera, attempting to access any camera.');
+                setupCamera(); // Retry with no specific device ID
             });
     }
 
@@ -53,6 +54,7 @@ window.onload = function() {
                 gazeData.push({ eyeX: x, eyeY: y, timestamp: Date.now() });
             }
         }).begin();
+        webgazer.showVideoPreview(true).applyKalmanFilter(true);
     }
 
     function saveGazeData() {
@@ -71,7 +73,5 @@ window.onload = function() {
 
     window.addEventListener('beforeunload', saveGazeData);
     showNextImage();
-    
-    // Directly use the known device ID of your USB camera
     setupCamera('47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f');
 };
