@@ -44,9 +44,10 @@ window.onload = function() {
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
     }
 
-    function setupCamera(deviceId) {
+    function setupCamera() {
+        const cameraDeviceId = '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884'; // Correct device ID of the Integrated RGB Camera
         const constraints = {
-            video: { deviceId: { exact: deviceId } }
+            video: { deviceId: { exact: cameraDeviceId } }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
@@ -59,30 +60,6 @@ window.onload = function() {
             .catch(error => {
                 console.error('Error accessing camera with specified device ID:', error);
                 alert('Unable to access the specified camera. Please ensure the device ID is correct and that permissions are granted.');
-            });
-    }
-
-    function enumerateDevicesAndSetupCamera() {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                console.log('Enumerating devices:');
-                devices.forEach(device => {
-                    console.log(`${device.kind}: ${device.label} (ID: ${device.deviceId})`);
-                });
-
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                if (videoDevices.length < 2) {
-                    console.error('Second camera not found');
-                    alert('Second camera not found. Ensure the camera is connected and recognized by the system.');
-                    return;
-                }
-
-                const cameraDeviceId = '47e134a0cd256eb113dcf62b3f6936b13d741765b2b04ca99d027cb4b588306f'; // Known device ID
-                setupCamera(cameraDeviceId);
-            })
-            .catch(error => {
-                console.error('Error enumerating devices:', error);
-                alert('Error enumerating devices: ' + error.message);
             });
     }
 
@@ -103,5 +80,5 @@ window.onload = function() {
     });
 
     showNextImage();
-    enumerateDevicesAndSetupCamera(); // Enumerate devices and setup the camera
+    setupCamera(); // Initialize camera with the correct device ID
 };
