@@ -44,8 +44,11 @@ window.onload = function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(true)
-               .showPredictionPoints(true);
+        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
+               .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
+
+        webgazer.setVideoElement(videoElement);
     }
 
     // Function to setup the camera
@@ -59,7 +62,6 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
-                webgazer.setVideoElement(videoElement);
                 setupWebGazer(); // Initialize WebGazer after the camera is active
             })
             .catch(error => {
