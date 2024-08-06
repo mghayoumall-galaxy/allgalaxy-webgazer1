@@ -116,4 +116,8 @@ window.onload = function() {
 
     // Start the calibration process
     startCalibration();
+
+    // Additional debugging
+    console.log('WebGazer version:', webgazer.version);
+    console.log('WebGazer state:', webgazer.getState());
 };
