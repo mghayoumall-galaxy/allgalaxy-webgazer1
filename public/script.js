@@ -1,7 +1,7 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
-    const gazeDataDiv = document.getElementById('gazeData'); // Ensure this element exists in your HTML
+    const gazeDataDiv = document.getElementById('gazeData');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -16,35 +16,31 @@ window.onload = function() {
     ];
 
     let currentImageIndex = 0;
+    let secondCameraId = null;
 
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
+            setTimeout(showNextImage, 5000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0; // Reset index to loop images
-            showNextImage(); // Start the cycle again if needed
+            currentImageIndex = 0;
+            showNextImage();
         }
     }
-
-    showNextImage();
 
     function setupWebGazer(videoStream) {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
-                const x = data.x; // X coordinate of the gaze
-                const y = data.y; // Y coordinate of the gaze
+                const x = data.x;
+                const y = data.y;
                 gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
                 console.log(`Gaze coordinates: (${x}, ${y})`);
             }
         }).begin();
 
-        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
-               .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
-
-        // Force WebGazer to use the stream from the second camera
-        webgazer.setVideoSource(videoElement);
+        webgazer.showVideoPreview(true).showPredictionPoints(true);
+        webgazer.setVideoElement(videoElement);
         webgazer.setStream(videoStream);
         videoElement.srcObject = videoStream;
         videoElement.play();
@@ -60,7 +56,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                setupWebGazer(stream); // Pass the stream to WebGazer for eye-tracking
+                setupWebGazer(stream);
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
@@ -77,7 +73,7 @@ window.onload = function() {
                     return;
                 }
 
-                const secondCameraId = videoDevices[1].deviceId;
+                secondCameraId = videoDevices[1].deviceId; // Assuming the second device in the list is the desired camera
                 console.log('Using second camera with device ID:', secondCameraId);
                 setupCamera(secondCameraId);
             })
@@ -93,4 +89,6 @@ window.onload = function() {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
+
+    showNextImage();
 };
