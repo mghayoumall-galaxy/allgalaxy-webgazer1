@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = async function() {
     const videoElement = document.getElementById('webcamVideo');
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
@@ -7,38 +7,14 @@ window.onload = function() {
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
-    // Function to initialize WebGazer
-    function setupWebGazer() {
-        if (typeof webgazer === 'undefined') {
-            console.error('WebGazer is not loaded.');
-            return;
-        }
-
-        console.log('Initializing WebGazer...');
-        webgazer.begin()
-            .then(() => {
-                console.log('WebGazer initialized.');
-                webgazer.showVideoPreview(true) // Show video preview
-                       .showPredictionPoints(true) // Show prediction points
-                       .applyKalmanFilter(true) // Apply Kalman filter
-                       .setVideoElement(videoElement); // Set video element
-
-                // Set gaze listener
-                webgazer.setGazeListener(function(data) {
-                    if (data) {
-                        const x = data.x;
-                        const y = data.y;
-                        gazeDataDiv.innerText = `Gaze coordinates: X ${x.toFixed(2)}, Y ${y.toFixed(2)}`;
-                        console.log(`Gaze coordinates: (${x.toFixed(2)}, ${y.toFixed(2)})`);
-                    }
-                });
-            })
-            .catch(err => {
-                console.error('Error initializing WebGazer:', err);
-            });
+    // Load face-api models
+    async function loadModels() {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
     }
 
-    // Function to setup the camera
+    // Start the video stream
     function setupCamera() {
         const constraints = { video: true };
 
@@ -47,7 +23,10 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is active.');
-                setupWebGazer(); // Initialize WebGazer after the camera is active
+                loadModels().then(() => {
+                    console.log('Models loaded.');
+                    startTracking();
+                });
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -55,7 +34,38 @@ window.onload = function() {
             });
     }
 
-    // Function to show calibration points sequentially
+    // Start tracking
+    function startTracking() {
+        const canvas = faceapi.createCanvasFromMedia(videoElement);
+        document.body.append(canvas);
+        const displaySize = { width: videoElement.width, height: videoElement.height };
+        faceapi.matchDimensions(canvas, displaySize);
+
+        setInterval(async () => {
+            const detections = await faceapi.detectSingleFace(videoElement).withFaceLandmarks();
+            if (detections) {
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawFaceLandmarks(canvas, resizedDetections.landmarks);
+
+                // Calculate eye gaze data
+                const { leftEye, rightEye } = resizedDetections.landmarks;
+                const leftEyeCenter = leftEye.reduce((acc, point) => ({
+                    x: acc.x + point.x / leftEye.length,
+                    y: acc.y + point.y / leftEye.length
+                }), { x: 0, y: 0 });
+                const rightEyeCenter = rightEye.reduce((acc, point) => ({
+                    x: acc.x + point.x / rightEye.length,
+                    y: acc.y + point.y / rightEye.length
+                }), { x: 0, y: 0 });
+
+                gazeDataDiv.innerHTML = `Left Eye Center: x: ${leftEyeCenter.x.toFixed(2)}, y: ${leftEyeCenter.y.toFixed(2)}<br>
+                                          Right Eye Center: x: ${rightEyeCenter.x.toFixed(2)}, y: ${rightEyeCenter.y.toFixed(2)}`;
+            }
+        }, 100);
+    }
+
+    // Show calibration points sequentially
     function showCalibrationPoint() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
@@ -72,7 +82,7 @@ window.onload = function() {
         }
     }
 
-    // Function to start calibration
+    // Start the calibration process
     function startCalibration() {
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
