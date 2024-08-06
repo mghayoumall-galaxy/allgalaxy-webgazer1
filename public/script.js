@@ -1,7 +1,7 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
-    const gazeDataDiv = document.getElementById('gazeData');
+    const gazeDataDiv = document.getElementById('gazeData'); // Ensure this element exists in your HTML
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -20,17 +20,17 @@ window.onload = function() {
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000);
+            setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
-            showNextImage();
+            showNextImage(); // Restart the cycle
         }
     }
 
     showNextImage();
 
-    function setupWebGazer(videoStream) {
+    function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -42,10 +42,6 @@ window.onload = function() {
 
         webgazer.showVideoPreview(true)
                .showPredictionPoints(true);
-
-        // Set WebGazer to use the video stream
-        webgazer.setVideoElement(videoElement);
-        webgazer.setStream(videoStream);
     }
 
     function setupCamera(deviceId) {
@@ -58,7 +54,8 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                setupWebGazer(stream);
+                webgazer.setVideoElement(videoElement); // Ensure WebGazer uses this video element
+                setupWebGazer();
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
