@@ -43,8 +43,8 @@ window.onload = function() {
         webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
 
-        // Explicitly set the video source for WebGazer
-        webgazer.setVideoSource(videoElement);
+        // Set WebGazer to use the video element's stream
+        webgazer.setVideoElement(videoElement);
         videoElement.srcObject = videoStream;
         videoElement.play();
     }
@@ -56,6 +56,8 @@ window.onload = function() {
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
                 setupWebGazer(stream); // Pass the stream to WebGazer for eye-tracking
             })
