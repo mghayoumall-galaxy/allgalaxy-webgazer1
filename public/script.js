@@ -45,20 +45,19 @@ window.onload = function() {
         }).begin()
         .then(() => {
             console.log('WebGazer started');
+            webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+                    .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
+                    .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
+
+            webgazer.setVideoElement(videoElement);
+
+            // Enable face tracking
+            webgazer.showFaceOverlay(true);
+            webgazer.showFaceFeedbackBox(true);
         })
         .catch((err) => {
             console.error('WebGazer failed to start:', err);
         });
-
-        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
-               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
-               .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
-
-        webgazer.setVideoElement(videoElement);
-
-        // Enable face tracking
-        webgazer.showFaceOverlay(true);
-        webgazer.showFaceFeedbackBox(true);
     }
 
     // Function to setup the camera
