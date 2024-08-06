@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eye Tracking Demo</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://webgazer.cs.brown.edu/release/webgazer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webgazer@0.0.0-beta.2/dist/webgazer.min.js"></script>
     <script>
         // Ensure WebGazer is loaded before running any scripts
         window.addEventListener('load', function() {
@@ -28,10 +28,10 @@
             </section>
             <section id="gaze-info">
                 <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video> <!-- Added playsinline attribute for better mobile support -->
+                    <video id="webcamVideo" autoplay playsinline></video>
                 </div>
                 <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image"> <!-- Set initial src for the image -->
+                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image">
                 </div>
             </section>
             <div id="gazeData"></div>
@@ -51,7 +51,6 @@
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
-    <!-- Your script.js should be included at the end to ensure it runs after HTML elements are loaded -->
     <script src="script.js" defer></script>
 </body>
 </html>
