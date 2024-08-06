@@ -21,6 +21,7 @@ window.onload = function() {
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
+    // Function to show next image
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
@@ -32,8 +33,8 @@ window.onload = function() {
         }
     }
 
+    // Function to initialize WebGazer
     function setupWebGazer() {
-        // Initialize WebGazer
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -43,11 +44,11 @@ window.onload = function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
-               .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
-        webgazer.setRegression('ridge'); // Use ridge regression for gaze prediction
+        webgazer.showVideoPreview(true)
+               .showPredictionPoints(true);
     }
 
+    // Function to setup the camera
     function setupCamera() {
         const constraints = {
             video: true
@@ -67,6 +68,7 @@ window.onload = function() {
             });
     }
 
+    // Function to show calibration points sequentially
     function showCalibrationPoint() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
@@ -83,6 +85,7 @@ window.onload = function() {
         }
     }
 
+    // Function to start calibration
     function startCalibration() {
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
