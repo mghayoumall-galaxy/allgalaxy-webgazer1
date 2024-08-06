@@ -41,6 +41,8 @@ window.onload = function() {
                 const y = data.y;
                 gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
                 console.log(`Gaze coordinates: (${x}, ${y})`);
+            } else {
+                console.log('No gaze data available.');
             }
         }).begin()
         .then(() => {
