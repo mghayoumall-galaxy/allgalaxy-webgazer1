@@ -43,8 +43,9 @@ window.onload = function() {
         webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
 
-        // Set WebGazer to use the video element's stream
-        webgazer.setVideoElement(videoElement);
+        // Force WebGazer to use the stream from the second camera
+        webgazer.setVideoSource(videoElement);
+        webgazer.setStream(videoStream);
         videoElement.srcObject = videoStream;
         videoElement.play();
     }
