@@ -33,7 +33,7 @@ window.onload = function() {
     }
 
     function setupWebGazer() {
-        // Start WebGazer and set its video element
+        // Initialize WebGazer
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -45,7 +45,7 @@ window.onload = function() {
 
         webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
                .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
-        webgazer.setVideoElement(videoElement);
+        webgazer.setRegression('ridge'); // Use ridge regression for gaze prediction
     }
 
     function setupCamera() {
@@ -58,6 +58,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
+                webgazer.setVideoElement(videoElement);
                 setupWebGazer(); // Initialize WebGazer after the camera is active
             })
             .catch(error => {
@@ -87,6 +88,7 @@ window.onload = function() {
         showCalibrationPoint();
     }
 
+    // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         setupCamera();
     } else {
