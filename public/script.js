@@ -1,7 +1,7 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const gazeDataDiv = document.getElementById('gazeData');
-    
+
     // Function to initialize WebGazer
     function setupWebGazer() {
         console.log('Initializing WebGazer...');
