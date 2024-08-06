@@ -32,7 +32,7 @@ window.onload = function() {
         }
     }
 
-    function setupWebGazer() {
+    function setupWebGazer(videoStream) {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -44,6 +44,9 @@ window.onload = function() {
 
         webgazer.showVideoPreview(true)
                .showPredictionPoints(true);
+
+        webgazer.setVideoElement(videoElement);
+        webgazer.setStream(videoStream);
     }
 
     function setupCamera(deviceId) {
@@ -56,8 +59,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                webgazer.setVideoElement(videoElement);
-                setupWebGazer();
+                setupWebGazer(stream);
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
@@ -96,8 +98,7 @@ window.onload = function() {
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
-            // Start eye tracking after calibration
-            showNextImage();
+            showNextImage(); // Start showing images after calibration
         }
     }
 
