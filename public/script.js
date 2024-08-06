@@ -49,6 +49,10 @@ window.onload = function() {
                .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
 
         webgazer.setVideoElement(videoElement);
+
+        // Enable face tracking
+        webgazer.showFaceOverlay(true);
+        webgazer.showFaceFeedbackBox(true);
     }
 
     // Function to setup the camera
@@ -75,8 +79,10 @@ window.onload = function() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
             point.style.visibility = 'visible';
+            console.log(`Showing calibration point ${calibrationStep + 1}`);
             setTimeout(() => {
                 point.style.visibility = 'hidden';
+                console.log(`Hiding calibration point ${calibrationStep + 1}`);
                 calibrationStep++;
                 showCalibrationPoint();
             }, 2000); // Show each calibration point for 2 seconds
