@@ -1,7 +1,9 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
-    const gazeDataDiv = document.getElementById('gazeData'); // Ensure this element exists in your HTML
+    const gazeDataDiv = document.getElementById('gazeData');
+    const calibrationDiv = document.getElementById('calibrationDiv');
+    const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -16,19 +18,19 @@ window.onload = function() {
     ];
 
     let currentImageIndex = 0;
+    let calibrationStep = 0;
+    const totalCalibrationSteps = 9;
 
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
+            setTimeout(showNextImage, 5000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
-            showNextImage(); // Restart the cycle
+            showNextImage();
         }
     }
-
-    showNextImage();
 
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
@@ -54,7 +56,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                webgazer.setVideoElement(videoElement); // Ensure WebGazer uses this video element
+                webgazer.setVideoElement(videoElement);
                 setupWebGazer();
             })
             .catch(error => {
@@ -82,10 +84,35 @@ window.onload = function() {
             });
     }
 
+    function showCalibrationPoint() {
+        if (calibrationStep < totalCalibrationSteps) {
+            const point = calibrationPoints[calibrationStep];
+            point.style.visibility = 'visible';
+            setTimeout(() => {
+                point.style.visibility = 'hidden';
+                calibrationStep++;
+                showCalibrationPoint();
+            }, 2000); // Show each calibration point for 2 seconds
+        } else {
+            console.log('Calibration complete.');
+            calibrationDiv.style.display = 'none';
+            // Start eye tracking after calibration
+            showNextImage();
+        }
+    }
+
+    function startCalibration() {
+        calibrationDiv.style.display = 'flex';
+        showCalibrationPoint();
+    }
+
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         enumerateDevicesAndSetupCamera();
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
+
+    // Start the calibration process
+    startCalibration();
 };

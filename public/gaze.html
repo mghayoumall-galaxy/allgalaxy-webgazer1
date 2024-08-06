@@ -18,22 +18,30 @@
             </section>
             <section id="gaze-info">
                 <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video> <!-- Added playsinline attribute for better mobile support -->
+                    <video id="webcamVideo" autoplay playsinline></video>
                 </div>
                 <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image"> <!-- Set initial src for the image -->
+                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image">
                 </div>
             </section>
             <div id="gazeData"></div>
+            <div id="calibrationDiv" class="calibration" hidden>
+                <div class="calibrationPoint" id="point1"></div>
+                <div class="calibrationPoint" id="point2"></div>
+                <div class="calibrationPoint" id="point3"></div>
+                <div class="calibrationPoint" id="point4"></div>
+                <div class="calibrationPoint" id="point5"></div>
+                <div class="calibrationPoint" id="point6"></div>
+                <div class="calibrationPoint" id="point7"></div>
+                <div class="calibrationPoint" id="point8"></div>
+                <div class="calibrationPoint" id="point9"></div>
+            </div>
         </main>
         <footer>
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
-
-    <!-- Ensure scripts are loaded at the end of the body for better page load performance -->
-    <!-- Include WebGazer.js -->
-    <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
-    <script src="script.js" defer></script> <!-- Defer script.js to ensure it loads after the DOM is ready -->
+    <script src="https://webgazer.cs.brown.edu/release/webgazer.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
