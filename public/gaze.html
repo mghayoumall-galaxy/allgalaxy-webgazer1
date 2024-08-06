@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eye Tracking Demo</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://webgazer.cs.brown.edu/release/webgazer.js"></script>
+    <script>
+        // Ensure WebGazer is loaded before running any scripts
+        window.addEventListener('load', function() {
+            if (typeof webgazer === 'undefined') {
+                console.error('WebGazer failed to load.');
+                alert('Error: WebGazer failed to load. Please try refreshing the page.');
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -41,7 +51,7 @@
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
-    <script src="https://webgazer.cs.brown.edu/release/webgazer.js"></script>
+    <!-- Your script.js should be included at the end to ensure it runs after HTML elements are loaded -->
     <script src="script.js" defer></script>
 </body>
 </html>
