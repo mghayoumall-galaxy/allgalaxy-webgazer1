@@ -5,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eye Tracking Demo</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/webgazer@0.0.0-beta.2/dist/webgazer.min.js"></script>
-    <script>
-        // Ensure WebGazer is loaded before running any scripts
-        window.addEventListener('load', function() {
-            if (typeof webgazer === 'undefined') {
-                console.error('WebGazer failed to load.');
-                alert('Error: WebGazer failed to load. Please try refreshing the page.');
-            }
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/gaze@latest/gaze.min.js"></script>
 </head>
 <body>
     <div class="container">
