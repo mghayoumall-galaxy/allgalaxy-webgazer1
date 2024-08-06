@@ -16,7 +16,6 @@ window.onload = function() {
     ];
 
     let currentImageIndex = 0;
-    let secondCameraId = '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884'; // Ensure this ID is correct
 
     function showNextImage() {
         if (currentImageIndex < images.length) {
@@ -43,6 +42,8 @@ window.onload = function() {
 
         webgazer.showVideoPreview(true)
                .showPredictionPoints(true);
+
+        // Set WebGazer to use the video stream
         webgazer.setVideoElement(videoElement);
         webgazer.setStream(videoStream);
     }
@@ -57,7 +58,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                setupWebGazer(stream); // Initialize WebGazer with the video stream
+                setupWebGazer(stream);
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
@@ -74,7 +75,7 @@ window.onload = function() {
                     return;
                 }
 
-                secondCameraId = videoDevices[1].deviceId;
+                const secondCameraId = videoDevices[1].deviceId;
                 console.log('Using second camera with device ID:', secondCameraId);
                 setupCamera(secondCameraId);
             })
