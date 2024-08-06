@@ -44,9 +44,6 @@ window.onload = function() {
 
         webgazer.showVideoPreview(true)
                .showPredictionPoints(true);
-
-        webgazer.setVideoElement(videoElement);
-        webgazer.begin();
     }
 
     function setupCamera() {
@@ -59,6 +56,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
+                webgazer.setVideoElement(videoElement);
                 setupWebGazer();
             })
             .catch(error => {
