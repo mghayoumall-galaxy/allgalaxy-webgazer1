@@ -32,7 +32,7 @@ window.onload = function() {
         }
     }
 
-    function setupWebGazer(videoStream) {
+    function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -46,43 +46,24 @@ window.onload = function() {
                .showPredictionPoints(true);
 
         webgazer.setVideoElement(videoElement);
-        webgazer.setStream(videoStream);
+        webgazer.begin();
     }
 
-    function setupCamera(deviceId) {
+    function setupCamera() {
         const constraints = {
-            video: { deviceId: { exact: deviceId } }
+            video: true
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 videoElement.srcObject = stream;
                 videoElement.play();
-                console.log('Camera is now active with the specified device ID.');
-                setupWebGazer(stream);
+                console.log('Camera is now active.');
+                setupWebGazer();
             })
             .catch(error => {
-                console.error('Error accessing the specified camera:', error);
-                alert('Unable to access the specified camera. Please ensure the device ID is correct and that permissions are granted.');
-            });
-    }
-
-    function enumerateDevicesAndSetupCamera() {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                if (videoDevices.length < 2) {
-                    alert('Second camera not found. Ensure the camera is connected and recognized by the system.');
-                    return;
-                }
-
-                const secondCameraId = videoDevices[1].deviceId;
-                console.log('Using second camera with device ID:', secondCameraId);
-                setupCamera(secondCameraId);
-            })
-            .catch(error => {
-                console.error('Error enumerating devices:', error);
-                alert('Failed to enumerate devices. Check the console for details.');
+                console.error('Error accessing the camera:', error);
+                alert('Unable to access the camera. Please ensure permissions are granted.');
             });
     }
 
@@ -108,7 +89,7 @@ window.onload = function() {
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        enumerateDevicesAndSetupCamera();
+        setupCamera();
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
