@@ -1,7 +1,7 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const gazeDataDiv = document.getElementById('gazeData');
-
+    
     // Function to initialize WebGazer
     function setupWebGazer() {
         console.log('Initializing WebGazer...');
@@ -10,8 +10,8 @@ window.onload = function() {
             if (data) {
                 const x = data.x;
                 const y = data.y;
-                gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-                console.log(`Gaze coordinates: (${x}, ${y})`);
+                gazeDataDiv.innerText = `Gaze coordinates: X ${x.toFixed(2)}, Y ${y.toFixed(2)}`;
+                console.log(`Gaze coordinates: (${x.toFixed(2)}, ${y.toFixed(2)})`);
             } else {
                 console.log('No gaze data available.');
             }
@@ -56,7 +56,4 @@ window.onload = function() {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
-
-    // Additional debugging
-    console.log('WebGazer version:', webgazer.version);
 };
