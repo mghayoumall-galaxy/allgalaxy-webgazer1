@@ -33,6 +33,7 @@ window.onload = function() {
     }
 
     function setupWebGazer() {
+        // Start WebGazer and set its video element
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -42,8 +43,9 @@ window.onload = function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(true)
-               .showPredictionPoints(true);
+        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+               .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
+        webgazer.setVideoElement(videoElement);
     }
 
     function setupCamera() {
@@ -56,8 +58,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
-                webgazer.setVideoElement(videoElement);
-                setupWebGazer();
+                setupWebGazer(); // Initialize WebGazer after the camera is active
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
