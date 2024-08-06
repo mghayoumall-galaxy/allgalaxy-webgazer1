@@ -23,25 +23,30 @@ window.onload = function() {
             setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0;
-            showNextImage(); // Restart the cycle
+            currentImageIndex = 0; // Reset index to loop images
+            showNextImage(); // Start the cycle again if needed
         }
     }
 
     showNextImage();
 
-    function setupWebGazer() {
+    function setupWebGazer(videoStream) {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
-                const x = data.x;
-                const y = data.y;
+                const x = data.x; // X coordinate of the gaze
+                const y = data.y; // Y coordinate of the gaze
                 gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
                 console.log(`Gaze coordinates: (${x}, ${y})`);
             }
         }).begin();
 
-        webgazer.showVideoPreview(true)
-               .showPredictionPoints(true);
+        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+               .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
+
+        // Explicitly set the video source for WebGazer
+        webgazer.setVideoSource(videoElement);
+        videoElement.srcObject = videoStream;
+        videoElement.play();
     }
 
     function setupCamera(deviceId) {
@@ -51,11 +56,8 @@ window.onload = function() {
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                webgazer.setVideoElement(videoElement); // Ensure WebGazer uses this video element
-                setupWebGazer();
+                setupWebGazer(stream); // Pass the stream to WebGazer for eye-tracking
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
