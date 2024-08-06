@@ -23,8 +23,8 @@ window.onload = function() {
             setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0; // Reset index to loop images
-            showNextImage(); // Start the cycle again if needed
+            currentImageIndex = 0;
+            showNextImage(); // Restart the cycle
         }
     }
 
@@ -40,15 +40,15 @@ window.onload = function() {
             }
         }).begin();
 
-        webgazer.setCameraConstraints({ // Set the constraints to use the second camera for WebGazer
+        webgazer.setCameraConstraints({
             video: {
-                deviceId: { exact: '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884' } // Second camera device ID
+                deviceId: { exact: '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884' }
             }
-        });
+        }); // Set the device ID explicitly for WebGazer
 
         webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
-               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
-               .applyKalmanFilter(true); // Apply Kalman Filter for smooth prediction
+               .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
+        webgazer.begin();
     }
 
     function setupCamera(deviceId) {
@@ -65,27 +65,15 @@ window.onload = function() {
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
-                fallbackToDefaultCamera();
-            });
-    }
-
-    function fallbackToDefaultCamera() {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                console.log('Fallback to default camera successful.');
-                setupWebGazer(); // Initialize WebGazer even on fallback
-            })
-            .catch(error => {
-                console.error('Error accessing any camera:', error);
+                alert('Unable to access the specified camera. Please ensure the device ID is correct and that permissions are granted.');
             });
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        setupCamera('30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884'); // Use the specific device ID here
+        // Use your specific device ID for the second camera here
+        setupCamera('30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884');
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
-        fallbackToDefaultCamera();
+        alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
 };
