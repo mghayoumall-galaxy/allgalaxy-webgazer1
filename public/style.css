@@ -99,6 +99,7 @@ footer {
 footer p {
     margin: 0;
 }
+
 .calibration {
     position: absolute;
     width: 100%;
@@ -119,4 +120,3 @@ footer p {
     position: absolute;
     visibility: hidden;
 }
-
