@@ -9,9 +9,14 @@ window.onload = async function() {
 
     // Load face-api models
     async function loadModels() {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+            console.log('Models loaded.');
+        } catch (error) {
+            console.error('Error loading models:', error);
+        }
     }
 
     // Start the video stream
@@ -24,7 +29,6 @@ window.onload = async function() {
                 videoElement.play();
                 console.log('Camera is active.');
                 loadModels().then(() => {
-                    console.log('Models loaded.');
                     startTracking();
                 });
             })
