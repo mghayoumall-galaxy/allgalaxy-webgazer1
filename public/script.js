@@ -42,7 +42,13 @@ window.onload = function() {
                 gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
                 console.log(`Gaze coordinates: (${x}, ${y})`);
             }
-        }).begin();
+        }).begin()
+        .then(() => {
+            console.log('WebGazer started');
+        })
+        .catch((err) => {
+            console.error('WebGazer failed to start:', err);
+        });
 
         webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
                .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
