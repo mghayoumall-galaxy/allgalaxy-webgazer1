@@ -1,7 +1,7 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
-    const gazeDataDiv = document.getElementById('gazeData'); // Ensure this element is in your HTML
+    const gazeDataDiv = document.getElementById('gazeData'); // Ensure this element exists in your HTML
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -23,8 +23,8 @@ window.onload = function() {
             setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0;
-            showNextImage(); // Restart the cycle
+            currentImageIndex = 0; // Reset index to loop images
+            showNextImage(); // Start the cycle again if needed
         }
     }
 
@@ -33,32 +33,22 @@ window.onload = function() {
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
-                const x = data.x;
-                const y = data.y;
+                const x = data.x; // X coordinate of the gaze
+                const y = data.y; // Y coordinate of the gaze
                 gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+                console.log(`Gaze coordinates: (${x}, ${y})`);
             }
         }).begin();
 
-        webgazer.showVideoPreview(true)
-               .showPredictionPoints(true);
-    }
+        webgazer.setCameraConstraints({ // Set the constraints to use the second camera for WebGazer
+            video: {
+                deviceId: { exact: '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884' } // Second camera device ID
+            }
+        });
 
-    function enumerateAndSetupSecondCamera() {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                if (videoDevices.length < 2) {
-                    throw new Error('Second camera not found. Only one camera is available.');
-                }
-                
-                // Selecting the second camera
-                const secondCameraId = videoDevices[1].deviceId;
-                setupCamera(secondCameraId);
-            })
-            .catch(error => {
-                console.error('Error finding the second camera:', error);
-                alert('Failed to find the second camera. Check the console for details.');
-            });
+        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
+               .applyKalmanFilter(true); // Apply Kalman Filter for smooth prediction
     }
 
     function setupCamera(deviceId) {
@@ -71,18 +61,31 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                setupWebGazer();
+                setupWebGazer(); // Initialize WebGazer after the camera is successfully activated
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
-                alert('Unable to access the specified camera. Check device ID and permissions.');
+                fallbackToDefaultCamera();
+            });
+    }
+
+    function fallbackToDefaultCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                console.log('Fallback to default camera successful.');
+                setupWebGazer(); // Initialize WebGazer even on fallback
+            })
+            .catch(error => {
+                console.error('Error accessing any camera:', error);
             });
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        enumerateAndSetupSecondCamera();
+        setupCamera('30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884'); // Use the specific device ID here
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
-        alert('Your browser does not support the required features. Try updating or switching browsers.');
+        fallbackToDefaultCamera();
     }
 };
