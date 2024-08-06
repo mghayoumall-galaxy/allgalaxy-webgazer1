@@ -30,25 +30,22 @@ window.onload = function() {
 
     showNextImage();
 
-    function setupWebGazer() {
-        webgazer.setGazeListener(function(data, elapsedTime) {
-            if (data) {
-                const x = data.x; // X coordinate of the gaze
-                const y = data.y; // Y coordinate of the gaze
-                gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-                console.log(`Gaze coordinates: (${x}, ${y})`);
-            }
-        }).begin();
+    function setupWebGazer(videoStream) {
+        // Ensure WebGazer uses the video stream from the second camera
+        webgazer.setVideoElement(videoElement);
+        webgazer.setupWebGazer(videoStream, null).then(() => {
+            webgazer.setGazeListener(function(data, elapsedTime) {
+                if (data) {
+                    const x = data.x; // X coordinate of the gaze
+                    const y = data.y; // Y coordinate of the gaze
+                    gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+                    console.log(`Gaze coordinates: (${x}, ${y})`);
+                }
+            }).begin();
 
-        webgazer.setCameraConstraints({
-            video: {
-                deviceId: { exact: '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884' }
-            }
-        }); // Set the device ID explicitly for WebGazer
-
-        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
-               .showPredictionPoints(true); // Shows where WebGazer is predicting the user is looking
-        webgazer.begin();
+            webgazer.showVideoPreview(true)
+                   .showPredictionPoints(true);
+        });
     }
 
     function setupCamera(deviceId) {
@@ -61,7 +58,7 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active with the specified device ID.');
-                setupWebGazer(); // Initialize WebGazer after the camera is successfully activated
+                setupWebGazer(stream); // Pass the stream directly to WebGazer
             })
             .catch(error => {
                 console.error('Error accessing the specified camera:', error);
@@ -70,7 +67,6 @@ window.onload = function() {
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // Use your specific device ID for the second camera here
         setupCamera('30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884');
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
