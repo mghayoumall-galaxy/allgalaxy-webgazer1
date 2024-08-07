@@ -1,83 +1,68 @@
-window.onload = async function() {
+window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
+    const demoImage = document.getElementById('demoImage');
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
+    const images = [
+        'images/image1.jpg',
+        'images/image2.jpg',
+        'images/image3.jpg',
+        'images/image4.jpg',
+        'images/image5.jpg',
+        'images/image6.jpg',
+        'images/image7.jpg',
+        'images/image8.jpg',
+        'images/image9.jpg',
+        'images/image10.jpg'
+    ];
 
+    let currentImageIndex = 0;
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
-    // Load face-api.js models from specified URIs
-    async function loadModels() {
-        const modelPath = '/models'; // Adjust this path as needed
-        try {
-            await faceapi.nets.tinyFaceDetector.loadFromUri(modelPath);
-            await faceapi.nets.faceLandmark68Net.loadFromUri(modelPath);
-            await faceapi.nets.faceRecognitionNet.loadFromUri(modelPath);
-            console.log('Models loaded successfully.');
-        } catch (error) {
-            console.error('Error loading models:', error);
+    function showNextImage() {
+        if (currentImageIndex < images.length) {
+            demoImage.src = images[currentImageIndex++];
+            setTimeout(showNextImage, 5000); // Show each image for 5 seconds
+        } else {
+            console.log('Image display cycle complete. Restarting.');
+            currentImageIndex = 0; // Reset the image index to loop the display
+            showNextImage(); // Restart the image display cycle
         }
     }
 
-    // Set up the video stream and handle camera access
-    async function setupCamera() {
-        const constraints = { video: true };
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            videoElement.srcObject = stream;
-            videoElement.play();
-            console.log('Camera is active.');
-            await loadModels();
-            startTracking();
-        } catch (error) {
-            console.error('Error accessing the camera:', error);
-            alert('Unable to access the camera. Please ensure permissions are granted.');
-        }
-    }
-
-    // Start tracking eye movements using face-api.js
-    function startTracking() {
-        const canvas = faceapi.createCanvasFromMedia(videoElement);
-        document.body.append(canvas);
-        const displaySize = { width: videoElement.width, height: videoElement.height };
-        faceapi.matchDimensions(canvas, displaySize);
-
-        setInterval(async () => {
-            const detections = await faceapi.detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-            if (detections) {
-                const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-                faceapi.draw.drawFaceLandmarks(canvas, resizedDetections.landmarks);
-                updateGazeData(resizedDetections.landmarks);
+    function setupWebGazer() {
+        webgazer.setGazeListener(function(data, elapsedTime) {
+            if (data) {
+                const x = data.x;
+                const y = data.y;
+                gazeDataDiv.innerText = `Gaze coordinates: X ${x.toFixed(2)}, Y ${y.toFixed(2)}`;
             }
-        }, 100);
+        }).begin();
+
+        webgazer.showVideoPreview(true)
+               .showPredictionPoints(true)
+               .applyKalmanFilter(true)
+               .setVideoElement(videoElement);
     }
 
-    // Update gaze data display
-    function updateGazeData(landmarks) {
-        const leftEye = landmarks.getLeftEye();
-        const rightEye = landmarks.getRightEye();
-        const leftEyeCenter = calculateCenter(leftEye);
-        const rightEyeCenter = calculateCenter(rightEye);
+    function setupCamera() {
+        const constraints = { video: true };
 
-        gazeDataDiv.innerHTML = `Left Eye Center: x: ${leftEyeCenter.x.toFixed(2)}, y: ${leftEyeCenter.y.toFixed(2)}<br>
-                                 Right Eye Center: x: ${rightEyeCenter.x.toFixed(2)}, y: ${rightEyeCenter.y.toFixed(2)}`;
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                console.log('Camera is active. Initializing WebGazer.');
+                setupWebGazer();
+            })
+            .catch(error => {
+                console.error('Error accessing the camera:', error);
+                alert('Unable to access the camera. Please ensure permissions are granted.');
+            });
     }
 
-    // Calculate the center point of eye landmarks
-    function calculateCenter(points) {
-        const sum = points.reduce((acc, point) => ({
-            x: acc.x + point.x,
-            y: acc.y + point.y
-        }), { x: 0, y: 0 });
-        return {
-            x: sum.x / points.length,
-            y: sum.y / points.length
-        };
-    }
-
-    // Sequentially show calibration points
     function showCalibrationPoint() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
@@ -88,22 +73,24 @@ window.onload = async function() {
                 showCalibrationPoint();
             }, 2000);
         } else {
-            console.log('Calibration complete.');
+            console.log('Calibration complete. Starting image display.');
             calibrationDiv.style.display = 'none';
+            showNextImage();
         }
     }
 
-    // Begin the calibration process
     function startCalibration() {
+        console.log('Starting calibration process...');
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         setupCamera();
-        startCalibration();
     } else {
-        console.error('Browser API navigator.mediaDevices.getUserMedia not available');
+        console.error('Browser API navigator.mediaDevices.getUserMedia not available.');
         alert('Your browser does not support the required features. Please update your browser or switch to a compatible one.');
     }
+
+    startCalibration();
 };
