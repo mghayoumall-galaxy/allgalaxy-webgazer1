@@ -21,23 +21,30 @@ window.onload = function() {
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
+    // Verify if WebGazer has loaded properly
+    if (typeof webgazer === "undefined") {
+        console.error("WebGazer not loaded. Check script path or network connectivity.");
+        alert("Failed to load WebGazer. Please refresh the page or check your connection.");
+        return; // Stop further execution if WebGazer isn't loaded
+    }
+
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Show each image for 5 seconds
+            setTimeout(showNextImage, 5000);
         } else {
-            console.log('Image display cycle complete. Restarting.');
-            currentImageIndex = 0; // Reset the image index to loop the display
-            showNextImage(); // Restart the image display cycle
+            console.log('Restarting image display cycle.');
+            currentImageIndex = 0;
+            showNextImage();
         }
     }
 
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
-                const x = data.x;
-                const y = data.y;
-                gazeDataDiv.innerText = `Gaze coordinates: X ${x.toFixed(2)}, Y ${y.toFixed(2)}`;
+                const x = data.x.toFixed(2);
+                const y = data.y.toFixed(2);
+                gazeDataDiv.textContent = `Gaze coordinates: X ${x}, Y ${y}`;
             }
         }).begin();
 
