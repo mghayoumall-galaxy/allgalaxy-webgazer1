@@ -7,12 +7,12 @@ window.onload = async function() {
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
-    // Load face-api models
+    // Function to load models
     async function loadModels() {
         try {
-            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/dist/weights/tiny_face_detector_model-weights_manifest.json');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/dist/weights/face_landmark_68_model-weights_manifest.json');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/dist/weights/face_recognition_model-weights_manifest.json');
             console.log('Models loaded.');
         } catch (error) {
             console.error('Error loading models:', error);
@@ -20,22 +20,20 @@ window.onload = async function() {
     }
 
     // Start the video stream
-    function setupCamera() {
-        const constraints = { video: true };
+    async function setupCamera() {
+        try {
+            const constraints = { video: true };
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoElement.srcObject = stream;
+            videoElement.play();
+            console.log('Camera is active.');
 
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                console.log('Camera is active.');
-                loadModels().then(() => {
-                    startTracking();
-                });
-            })
-            .catch(error => {
-                console.error('Error accessing the camera:', error);
-                alert('Unable to access the camera. Please ensure permissions are granted.');
-            });
+            await loadModels();
+            startTracking();
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
+            alert('Unable to access the camera. Please ensure permissions are granted.');
+        }
     }
 
     // Start tracking
@@ -46,7 +44,7 @@ window.onload = async function() {
         faceapi.matchDimensions(canvas, displaySize);
 
         setInterval(async () => {
-            const detections = await faceapi.detectSingleFace(videoElement).withFaceLandmarks();
+            const detections = await faceapi.detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
             if (detections) {
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
                 canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -64,7 +62,7 @@ window.onload = async function() {
                 }), { x: 0, y: 0 });
 
                 gazeDataDiv.innerHTML = `Left Eye Center: x: ${leftEyeCenter.x.toFixed(2)}, y: ${leftEyeCenter.y.toFixed(2)}<br>
-                                          Right Eye Center: x: ${rightEyeCenter.x.toFixed(2)}, y: ${rightEyeCenter.y.toFixed(2)}`;
+                                        Right Eye Center: x: ${rightEyeCenter.x.toFixed(2)}, y: ${rightEyeCenter.y.toFixed(2)}`;
             }
         }, 100);
     }
