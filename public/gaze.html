@@ -4,45 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eye Tracking Demo</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        #gazeData {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            font-size: 16px;
+        }
+        #webcamVideo {
+            width: 640px;
+            height: 480px;
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Eye Tracking Demo</h1>
-        </header>
-        <main>
-            <section id="intro">
-                <p>Welcome to the Eye Tracking Demo. Please follow the instructions below to start the eye-tracking process.</p>
-                <p>When prompted, look at the objects in the images shown below the camera feed. Your gaze patterns will be recorded for analysis.</p>
-            </section>
-            <section id="gaze-info">
-                <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video> <!-- Web camera feed -->
-                </div>
-                <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image"> <!-- Placeholder for demo image -->
-                </div>
-            </section>
-            <div id="gazeData"></div>
-            <div id="calibrationDiv" class="calibration">
-                <!-- Calibration points positioned across the viewport -->
-                <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
-                <div class="calibrationPoint" id="point4" style="top: 50%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point5" style="top: 50%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point6" style="top: 50%; left: 90%;"></div>
-                <div class="calibrationPoint" id="point7" style="top: 90%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
-            </div>
-        </main>
-        <footer>
-            <p>&copy; 2024 AllGalaxy</p>
-        </footer>
+        <h1>Eye Tracking Demo</h1>
+        <video id="webcamVideo" autoplay playsinline></video>
+        <div id="gazeData">Waiting for gaze data...</div>
     </div>
-    <!-- Load WebGazer.js library -->
     <script src="https://webgazer.cs.brown.edu/release/webgazer.js"></script>
     <script src="script.js"></script>
 </body>

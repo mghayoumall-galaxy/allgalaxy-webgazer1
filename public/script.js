@@ -1,75 +1,109 @@
-window.onload = function() {
-    // Initialization checks
-    if (typeof webgazer === 'undefined') {
-        console.error('WebGazer library not loaded.');
-        return;
-    }
-
-    // Set up WebGazer
-    webgazer.setRegression('ridge')  // Use ridge regression for gaze prediction
-           .setTracker('clmtrackr')  // Use clmtrackr to track the face
-           .setGazeListener(function(data, elapsedTime) {
-               if (data) {
-                   updateGazeDisplay(data.x, data.y);
-               }
-           })
-           .begin()
-           .showVideoPreview(true)   // Show video preview from the webcam
-           .showPredictionPoints(true); // Show where the model predicts you are looking
-
+window.onload = async function() {
+    const videoElement = document.getElementById('webcamVideo');
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
 
-    // Function to update gaze coordinates displayed on the screen
-    function updateGazeDisplay(x, y) {
-        gazeDataDiv.innerHTML = `Gaze Coordinates: X=${x.toFixed(2)}, Y=${y.toFixed(2)}`;
-        drawGazePoint(x, y);
+    let calibrationStep = 0;
+    const totalCalibrationSteps = 9;
+
+    // Load face-api.js models from specified URIs
+    async function loadModels() {
+        const modelPath = '/models'; // Adjust this path as needed
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri(modelPath);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(modelPath);
+            await faceapi.nets.faceRecognitionNet.loadFromUri(modelPath);
+            console.log('Models loaded successfully.');
+        } catch (error) {
+            console.error('Error loading models:', error);
+        }
     }
 
-    // Canvas setup
-    const canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Draw gaze point on canvas
-    function drawGazePoint(x, y) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous gaze points
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, 2 * Math.PI); // Draw a circle at the gaze location
-        ctx.fill();
+    // Set up the video stream and handle camera access
+    async function setupCamera() {
+        const constraints = { video: true };
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoElement.srcObject = stream;
+            videoElement.play();
+            console.log('Camera is active.');
+            await loadModels();
+            startTracking();
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
+            alert('Unable to access the camera. Please ensure permissions are granted.');
+        }
     }
 
-    // Resize canvas on window resize
-    window.addEventListener('resize', function() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        webgazer.params.imgWidth = window.innerWidth;
-        webgazer.params.imgHeight = window.innerHeight;
-    });
+    // Start tracking eye movements using face-api.js
+    function startTracking() {
+        const canvas = faceapi.createCanvasFromMedia(videoElement);
+        document.body.append(canvas);
+        const displaySize = { width: videoElement.width, height: videoElement.height };
+        faceapi.matchDimensions(canvas, displaySize);
 
-    // Calibration setup
-    Array.from(calibrationPoints).forEach(point => {
-        point.addEventListener('click', function() {
-            const rect = point.getBoundingClientRect();
-            webgazer.addCalibrationPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-            point.style.backgroundColor = 'green'; // Visual feedback for calibration
-        });
-    });
+        setInterval(async () => {
+            const detections = await faceapi.detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
+            if (detections) {
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawFaceLandmarks(canvas, resizedDetections.landmarks);
+                updateGazeData(resizedDetections.landmarks);
+            }
+        }, 100);
+    }
 
-    // Ensure proper cleanup of WebGazer when the page is unloaded
-    window.onbeforeunload = function() {
-        webgazer.end();
-    };
+    // Update gaze data display
+    function updateGazeData(landmarks) {
+        const leftEye = landmarks.getLeftEye();
+        const rightEye = landmarks.getRightEye();
+        const leftEyeCenter = calculateCenter(leftEye);
+        const rightEyeCenter = calculateCenter(rightEye);
 
-    // Optionally start the calibration automatically or add a button/event to trigger it
+        gazeDataDiv.innerHTML = `Left Eye Center: x: ${leftEyeCenter.x.toFixed(2)}, y: ${leftEyeCenter.y.toFixed(2)}<br>
+                                 Right Eye Center: x: ${rightEyeCenter.x.toFixed(2)}, y: ${rightEyeCenter.y.toFixed(2)}`;
+    }
+
+    // Calculate the center point of eye landmarks
+    function calculateCenter(points) {
+        const sum = points.reduce((acc, point) => ({
+            x: acc.x + point.x,
+            y: acc.y + point.y
+        }), { x: 0, y: 0 });
+        return {
+            x: sum.x / points.length,
+            y: sum.y / points.length
+        };
+    }
+
+    // Sequentially show calibration points
+    function showCalibrationPoint() {
+        if (calibrationStep < totalCalibrationSteps) {
+            const point = calibrationPoints[calibrationStep];
+            point.style.visibility = 'visible';
+            setTimeout(() => {
+                point.style.visibility = 'hidden';
+                calibrationStep++;
+                showCalibrationPoint();
+            }, 2000);
+        } else {
+            console.log('Calibration complete.');
+            calibrationDiv.style.display = 'none';
+        }
+    }
+
+    // Begin the calibration process
     function startCalibration() {
-        calibrationDiv.style.display = 'block';
-        Array.from(calibrationPoints).forEach(point => point.style.visibility = 'visible');
+        calibrationDiv.style.display = 'flex';
+        showCalibrationPoint();
     }
 
-    startCalibration(); // Start calibration upon load, can be triggered differently as needed
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        setupCamera();
+        startCalibration();
+    } else {
+        console.error('Browser API navigator.mediaDevices.getUserMedia not available');
+        alert('Your browser does not support the required features. Please update your browser or switch to a compatible one.');
+    }
 };
