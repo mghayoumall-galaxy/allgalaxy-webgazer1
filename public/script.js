@@ -21,25 +21,23 @@ window.onload = function() {
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
-    // Verify if WebGazer has loaded properly
-    if (typeof webgazer === "undefined") {
-        console.error("WebGazer not loaded. Check script path or network connectivity.");
-        alert("Failed to load WebGazer. Please refresh the page or check your connection.");
-        return; // Stop further execution if WebGazer isn't loaded
-    }
-
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
             setTimeout(showNextImage, 5000);
         } else {
-            console.log('Restarting image display cycle.');
+            console.log('Image display cycle complete. Restarting.');
             currentImageIndex = 0;
             showNextImage();
         }
     }
 
     function setupWebGazer() {
+        if (typeof webgazer === 'undefined') {
+            console.error("WebGazer library not loaded. Please check the script path or internet connection.");
+            return;
+        }
+
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x.toFixed(2);
@@ -66,7 +64,7 @@ window.onload = function() {
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
-                alert('Unable to access the camera. Please ensure permissions are granted.');
+                alert('Unable to access the camera. Please ensure permissions are granted and the device has a camera.');
             });
     }
 
@@ -96,7 +94,7 @@ window.onload = function() {
         setupCamera();
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available.');
-        alert('Your browser does not support the required features. Please update your browser or switch to a compatible one.');
+        alert('Your browser does not support camera access features. Please update your browser or switch to a compatible one.');
     }
 
     startCalibration();
