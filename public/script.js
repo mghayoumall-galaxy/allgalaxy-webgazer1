@@ -28,7 +28,7 @@ window.onload = async function() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
             demoImage.style.display = 'block';
-            setTimeout(showNextImage, 20000); // Show each image for 20 seconds
+            setTimeout(showNextImage, 5000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
@@ -94,10 +94,7 @@ window.onload = async function() {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
             calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking in 30 seconds.';
-            setTimeout(() => {
-                calibrationMessage.innerText = '';
-                startEyeTracking(); // Start eye movement tracking after 30 seconds
-            }, 30000);
+            setTimeout(startEyeTracking, 30000); // Delay of 30 seconds before starting eye tracking
         }
     }
 
@@ -109,6 +106,7 @@ window.onload = async function() {
 
     // Function to start eye tracking
     function startEyeTracking() {
+        calibrationMessage.innerText = '';
         demoImage.style.display = 'block';
         showNextImage();
     }
@@ -161,6 +159,6 @@ window.onload = async function() {
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
 
-    // Start the calibration process automatically on load
+    // Start the calibration process
     startCalibration();
 };
