@@ -93,12 +93,12 @@ window.onload = async function() {
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
-            calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking in 10 seconds.';
+            calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking in 20 seconds.';
             setTimeout(() => {
                 calibrationMessage.innerText = '';
                 setTimeout(() => {
-                    startEyeTracking(); // Start eye movement tracking after 10 seconds
-                }, 10000);
+                    startEyeTracking(); // Start eye movement tracking after 20 seconds
+                }, 20000);
             }, 0);
         }
     }
