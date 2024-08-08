@@ -36,6 +36,9 @@ window.onload = async function() {
 
     // Function to initialize WebGazer
     function setupWebGazer() {
+        webgazer.clearData(); // Clear any previous data
+        webgazer.end(); // End any previous instance of WebGazer
+
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
