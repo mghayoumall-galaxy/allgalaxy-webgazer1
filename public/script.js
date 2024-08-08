@@ -31,9 +31,8 @@ window.onload = async function() {
             setTimeout(showNextImage, 20000); // Show each image for 20 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            webgazer.end(); // Stop WebGazer after all images are shown
-            demoImage.style.display = 'none';
-            calibrationMessage.innerText = 'Eye movement tracking complete.';
+            currentImageIndex = 0;
+            showNextImage();
         }
     }
 
