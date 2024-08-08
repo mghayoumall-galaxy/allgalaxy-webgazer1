@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = async function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
     const gazeDataDiv = document.getElementById('gazeData');
@@ -45,7 +45,7 @@ window.onload = function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+        webgazer.showVideoPreview(false) // Disable the default video preview
                .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
                .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
 
@@ -70,6 +70,7 @@ window.onload = function() {
                 videoElement.play();
                 console.log('Camera is now active.');
                 setupWebGazer(); // Initialize WebGazer after the camera is active
+                detectFace(); // Start facial tracking
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -115,6 +116,28 @@ window.onload = function() {
     cameraSelect.addEventListener('change', () => {
         setupCamera(cameraSelect.value);
     });
+
+    // Function to detect facial landmarks
+    async function detectFace() {
+        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
+        async function detect() {
+            const predictions = await model.estimateFaces({
+                input: videoElement,
+                returnTensors: false,
+                flipHorizontal: false,
+                predictIrises: true
+            });
+
+            if (predictions.length > 0) {
+                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
+                // Display or process the landmarks as needed
+                console.log('Facial Landmarks:', landmarks);
+            }
+
+            requestAnimationFrame(detect);
+        }
+        detect();
+    }
 
     // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
