@@ -6,36 +6,36 @@ body, h1, p, div, img, video {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #1e1e2f;
+    background-color: #282c34;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    color: #ececec;
-    overflow: hidden; /* Prevent scrolling */
+    color: #ffffff;
+    overflow: hidden;
 }
 
 .container {
     width: 90%;
-    max-width: 850px;
-    height: 100%; /* Ensure it takes the full height of the viewport */
-    background: linear-gradient(145deg, #2a2a3b, #1a1a28);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    max-width: 800px;
+    height: 100%;
+    background: #3a3f4b;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     text-align: center;
-    overflow: hidden; /* Prevent content overflow */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 header {
-    background: #ff6584;
-    color: #ffffff;
-    padding: 15px;
+    background: #61dafb;
+    color: #282c34;
+    padding: 20px;
     width: 100%;
     border-radius: 15px 15px 0 0;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 header h1 {
@@ -51,14 +51,13 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between; /* Distribute space evenly */
-    padding: 10px 0;
+    justify-content: center;
 }
 
 #intro {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-size: 1em;
-    color: #b3b3c3;
+    color: #a8aab3;
     font-weight: 300;
 }
 
@@ -70,39 +69,39 @@ main {
 }
 
 #camera-frame, #image-frame {
-    margin: 10px 0; /* Reduce margins */
+    margin: 15px 0;
     padding: 12px;
-    background: #1c1c29;
-    border: 2px solid #ff6584;
+    background: #282c34;
+    border: 3px solid #61dafb;
     border-radius: 15px;
     width: 100%;
-    max-width: 400px; /* Fixed width to ensure consistent sizing */
-    height: 250px; /* Fixed height for images */
+    max-width: 600px; /* Larger width for a more balanced design */
+    height: 350px; /* Fixed height for images */
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 #webcamVideo {
     width: 100%;
-    height: auto;
+    height: 100%;
     border-radius: 15px;
-    clip-path: circle(100px at center);
+    clip-path: circle(120px at center);
     object-fit: cover;
 }
 
 #gazeData {
     padding: 10px;
-    background-color: #2a2a3b;
-    border: 2px solid #ff6584;
+    background-color: #3a3f4b;
+    border: 3px solid #61dafb;
     border-radius: 15px;
-    margin-bottom: 10px; /* Reduce margin */
+    margin-bottom: 20px;
     width: 100%;
     text-align: center;
     font-size: 1.2em;
     font-weight: bold;
-    color: #ff6584;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: #61dafb;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 #demoImage {
@@ -110,7 +109,7 @@ main {
     height: 100%;
     object-fit: contain; /* Ensure the entire image fits within the frame */
     border-radius: 15px;
-    display: none;
+    display: block; /* Make sure the image is displayed */
 }
 
 #calibrationDiv {
@@ -135,7 +134,7 @@ main {
 }
 
 #cameraSelectContainer {
-    margin-top: 10px; /* Reduce margin */
+    margin-top: 10px;
 }
 
 button, select {
@@ -143,16 +142,16 @@ button, select {
     padding: 10px 20px;
     border: none;
     border-radius: 10px;
-    background-color: #ff6584;
-    color: white;
+    background-color: #61dafb;
+    color: #282c34;
     font-size: 1em;
     font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 button:hover, select:hover {
-    background-color: #ff3e5c;
+    background-color: #21a1c4;
     transform: translateY(-2px);
 }
 
@@ -167,14 +166,14 @@ select:disabled {
 
 button:focus, select:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 101, 132, 0.5);
+    box-shadow: 0 0 0 3px rgba(97, 218, 251, 0.5);
 }
 
 footer {
-    background: #ff6584;
-    color: #ffffff;
+    background: #61dafb;
+    color: #282c34;
     text-align: center;
-    padding: 10px;
+    padding: 15px;
     width: 100%;
     border-radius: 0 0 15px 15px;
 }
