@@ -21,13 +21,14 @@ window.onload = async function() {
     let currentImageIndex = 0;
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
+    let calibrationComplete = false;
 
     // Function to show next image
     function showNextImage() {
-        if (currentImageIndex < images.length) {
+        if (calibrationComplete && currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
             setTimeout(showNextImage, 5000);
-        } else {
+        } else if (calibrationComplete) {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
             showNextImage();
@@ -91,7 +92,9 @@ window.onload = async function() {
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
-            showNextImage(); // Start showing images after calibration
+            calibrationComplete = true;
+            gazeDataDiv.innerText = 'Calibration complete. Starting gaze data collection...';
+            setTimeout(showNextImage, 2000); // Start showing images after calibration
         }
     }
 
