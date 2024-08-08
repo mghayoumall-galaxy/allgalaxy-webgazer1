@@ -120,3 +120,33 @@ footer p {
     position: absolute;
     visibility: hidden;
 }
+
+/* New styles for better user interaction feedback */
+button, select {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #6200ea;
+    color: white;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, select:hover {
+    background-color: #7a00ff;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+select:disabled {
+    background-color: #eee;
+}
+
+button:focus, select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(98,0,234,0.5);
+}
