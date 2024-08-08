@@ -26,7 +26,6 @@ window.onload = async function() {
     const totalCalibrationSteps = 9;
     let calibrationComplete = false;
 
-    // Function to show next image
     function showNextImage() {
         if (calibrationComplete && currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
@@ -39,7 +38,6 @@ window.onload = async function() {
         }
     }
 
-    // Function to initialize WebGazer
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
@@ -50,14 +48,13 @@ window.onload = async function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(false) // Disable the default video preview
-               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
-               .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
+        webgazer.showVideoPreview(false)
+               .showPredictionPoints(true)
+               .applyKalmanFilter(true);
 
         webgazer.setVideoElement(videoElement);
     }
 
-    // Function to setup the camera
     async function setupCamera(deviceId) {
         if (videoElement.srcObject) {
             videoElement.srcObject.getTracks().forEach(track => track.stop());
@@ -69,23 +66,21 @@ window.onload = async function() {
             }
         };
 
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                console.log('Camera is now active.');
-                videoElement.style.display = 'block';
-                trackingInfo.style.display = 'block';
-                setupWebGazer(); // Initialize WebGazer after the camera is active
-                detectFace(); // Start facial tracking
-            })
-            .catch(error => {
-                console.error('Error accessing the camera:', error);
-                alert('Unable to access the camera. Please ensure permissions are granted.');
-            });
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoElement.srcObject = stream;
+            videoElement.play();
+            console.log('Camera is now active.');
+            videoElement.style.display = 'block';
+            trackingInfo.style.display = 'block';
+            setupWebGazer();
+            detectFace();
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
+            alert('Unable to access the camera. Please ensure permissions are granted.');
+        }
     }
 
-    // Function to show calibration points sequentially
     function showCalibrationPoint() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
@@ -94,7 +89,7 @@ window.onload = async function() {
                 point.style.visibility = 'hidden';
                 calibrationStep++;
                 showCalibrationPoint();
-            }, 2000); // Show each calibration point for 2 seconds
+            }, 2000);
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
@@ -104,32 +99,34 @@ window.onload = async function() {
             setTimeout(() => {
                 calibrationCompleteMessage.style.display = 'none';
                 showNextImage();
-            }, 2000); // Start showing images after calibration
+            }, 2000);
         }
     }
 
-    // Function to start calibration
     function startCalibration() {
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
     }
 
-    // Populate the camera select dropdown
     async function getVideoInputs() {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoInputs = devices.filter(device => device.kind === 'videoinput');
-        videoInputs.forEach((input, index) => {
-            const option = document.createElement('option');
-            option.value = input.deviceId;
-            option.text = input.label || `Camera ${index + 1}`;
-            cameraSelect.appendChild(option);
-        });
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoInputs = devices.filter(device => device.kind === 'videoinput');
+            videoInputs.forEach((input, index) => {
+                const option = document.createElement('option');
+                option.value = input.deviceId;
+                option.text = input.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
 
-        if (videoInputs.length > 0) {
-            cameraSelect.disabled = false;
-            startCalibrationButton.disabled = false;
-        } else {
-            alert('No camera found.');
+            if (videoInputs.length > 0) {
+                cameraSelect.disabled = false;
+                startCalibrationButton.disabled = false;
+            } else {
+                alert('No camera found.');
+            }
+        } catch (error) {
+            console.error('Error enumerating devices:', error);
         }
     }
 
@@ -146,29 +143,30 @@ window.onload = async function() {
         }
     });
 
-    // Function to detect facial landmarks
     async function detectFace() {
-        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
-        async function detect() {
-            const predictions = await model.estimateFaces({
-                input: videoElement,
-                returnTensors: false,
-                flipHorizontal: false,
-                predictIrises: true
-            });
+        try {
+            const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
+            async function detect() {
+                const predictions = await model.estimateFaces({
+                    input: videoElement,
+                    returnTensors: false,
+                    flipHorizontal: false,
+                    predictIrises: true
+                });
 
-            if (predictions.length > 0) {
-                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
-                // Display or process the landmarks as needed
-                console.log('Facial Landmarks:', landmarks);
+                if (predictions.length > 0) {
+                    const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
+                    console.log('Facial Landmarks:', landmarks);
+                }
+
+                requestAnimationFrame(detect);
             }
-
-            requestAnimationFrame(detect);
+            detect();
+        } catch (error) {
+            console.error('Error detecting face:', error);
         }
-        detect();
     }
 
-    // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         await getVideoInputs();
     } else {
