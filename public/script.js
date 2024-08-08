@@ -35,7 +35,7 @@ window.onload = async function() {
     }
 
     // Function to initialize WebGazer
-    function initializeWebGazer() {
+    function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -48,20 +48,7 @@ window.onload = async function() {
         webgazer.showVideoPreview(false) // Disable the default video preview
                .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
                .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
-    }
 
-    // Function to stop WebGazer
-    function stopWebGazer() {
-        if (webgazer.isReady()) {
-            webgazer.clearData();
-            webgazer.end();
-        }
-    }
-
-    // Function to setup WebGazer with the correct video element
-    function setupWebGazer() {
-        stopWebGazer();
-        initializeWebGazer();
         webgazer.setVideoElement(videoElement);
     }
 
@@ -77,16 +64,18 @@ window.onload = async function() {
             }
         };
 
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            videoElement.srcObject = stream;
-            await videoElement.play();
-            console.log('Camera is now active.');
-            setupWebGazer(); // Initialize WebGazer after the camera is active
-        } catch (error) {
-            console.error('Error accessing the camera:', error);
-            alert('Unable to access the camera. Please ensure permissions are granted.');
-        }
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                console.log('Camera is now active.');
+                setupWebGazer(); // Initialize WebGazer after the camera is active
+                detectFace(); // Start facial tracking
+            })
+            .catch(error => {
+                console.error('Error accessing the camera:', error);
+                alert('Unable to access the camera. Please ensure permissions are granted.');
+            });
     }
 
     // Function to show calibration points sequentially
@@ -152,8 +141,9 @@ window.onload = async function() {
 
     // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        await getVideoInputs();
-        setupCamera(cameraSelect.value);
+        getVideoInputs().then(() => {
+            setupCamera(cameraSelect.value);
+        });
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
