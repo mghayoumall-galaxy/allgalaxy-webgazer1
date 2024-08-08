@@ -23,20 +23,19 @@ window.onload = async function() {
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
 
-    // Function to show next image
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
             demoImage.style.display = 'block';
-            setTimeout(showNextImage, 5000);
+            setTimeout(showNextImage, 20000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
-            showNextImage();
+            demoImage.style.display = 'none';
+            calibrationMessage.innerText = 'Eye movement tracking complete.';
         }
     }
 
-    // Function to initialize WebGazer
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
@@ -47,14 +46,13 @@ window.onload = async function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(false) // Disable the default video preview
-               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
-               .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
+        webgazer.showVideoPreview(false)
+               .showPredictionPoints(true)
+               .applyKalmanFilter(true);
 
         webgazer.setVideoElement(videoElement);
     }
 
-    // Function to setup the camera
     async function setupCamera(deviceId) {
         if (videoElement.srcObject) {
             videoElement.srcObject.getTracks().forEach(track => track.stop());
@@ -71,8 +69,7 @@ window.onload = async function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
-                setupWebGazer(); // Initialize WebGazer after the camera is active
-                detectFace(); // Start facial tracking
+                setupWebGazer();
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -80,7 +77,6 @@ window.onload = async function() {
             });
     }
 
-    // Function to show calibration points sequentially
     function showCalibrationPoint() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
@@ -89,29 +85,26 @@ window.onload = async function() {
                 point.style.visibility = 'hidden';
                 calibrationStep++;
                 showCalibrationPoint();
-            }, 2000); // Show each calibration point for 2 seconds
+            }, 2000);
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
             calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking in 30 seconds.';
-            setTimeout(startEyeTracking, 30000); // Delay of 30 seconds before starting eye tracking
+            setTimeout(startEyeTracking, 30000);
         }
     }
 
-    // Function to start calibration
     function startCalibration() {
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
     }
 
-    // Function to start eye tracking
     function startEyeTracking() {
         calibrationMessage.innerText = '';
         demoImage.style.display = 'block';
         showNextImage();
     }
 
-    // Populate the camera select dropdown
     async function getVideoInputs() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoInputs = devices.filter(device => device.kind === 'videoinput');
@@ -127,29 +120,6 @@ window.onload = async function() {
         setupCamera(cameraSelect.value);
     });
 
-    // Function to detect facial landmarks
-    async function detectFace() {
-        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
-        async function detect() {
-            const predictions = await model.estimateFaces({
-                input: videoElement,
-                returnTensors: false,
-                flipHorizontal: false,
-                predictIrises: true
-            });
-
-            if (predictions.length > 0) {
-                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
-                // Display or process the landmarks as needed
-                console.log('Facial Landmarks:', landmarks);
-            }
-
-            requestAnimationFrame(detect);
-        }
-        detect();
-    }
-
-    // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         getVideoInputs().then(() => {
             setupCamera(cameraSelect.value);
@@ -159,6 +129,5 @@ window.onload = async function() {
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
 
-    // Start the calibration process
     startCalibration();
 };
