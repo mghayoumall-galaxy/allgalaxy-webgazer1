@@ -5,6 +5,7 @@ window.onload = async function() {
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const cameraSelect = document.getElementById('cameraSelect');
+    const calibrationMessage = document.getElementById('calibrationMessage');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -91,7 +92,11 @@ window.onload = async function() {
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
-            showNextImage(); // Start showing images after calibration
+            calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking.';
+            setTimeout(() => {
+                calibrationMessage.innerText = '';
+                showNextImage(); // Start showing images after calibration
+            }, 3000);
         }
     }
 
