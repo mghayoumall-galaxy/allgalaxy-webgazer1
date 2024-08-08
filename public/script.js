@@ -1,6 +1,9 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
+    const gazeDataDiv = document.getElementById('gazeData');
+    const calibrationDiv = document.getElementById('calibrationDiv');
+    const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -15,55 +18,89 @@ window.onload = function() {
     ];
 
     let currentImageIndex = 0;
+    let calibrationStep = 0;
+    const totalCalibrationSteps = 9;
+
+    // Function to show next image
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Rotate images every 5 seconds
+            setTimeout(showNextImage, 5000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0; // Reset index to loop images
-            showNextImage(); // Start the cycle again if needed
+            currentImageIndex = 0;
+            showNextImage();
         }
     }
 
-    showNextImage();
+    // Function to initialize WebGazer
+    function setupWebGazer() {
+        webgazer.setGazeListener(function(data, elapsedTime) {
+            if (data) {
+                const x = data.x;
+                const y = data.y;
+                gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
+                console.log(`Gaze coordinates: (${x}, ${y})`);
+            }
+        }).begin();
 
-    // Your specified USB camera's device ID
-    const cameraDeviceId = '30d91396f3369294a57955172911673cc95475ee2ee751c64520ff65c7a87884';
+        webgazer.showVideoPreview(true) // Shows the video feed that WebGazer is analyzing
+               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
+               .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
 
-    function setupCamera(deviceId) {
+        webgazer.setVideoElement(videoElement);
+    }
+
+    // Function to setup the camera
+    function setupCamera() {
         const constraints = {
-            video: { deviceId: { exact: deviceId } }
+            video: true
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 videoElement.srcObject = stream;
                 videoElement.play();
-                console.log('Camera is now active with the specified device ID.');
+                console.log('Camera is now active.');
+                setupWebGazer(); // Initialize WebGazer after the camera is active
             })
             .catch(error => {
-                console.error('Error accessing the specified camera:', error);
-                fallbackToDefaultCamera();
+                console.error('Error accessing the camera:', error);
+                alert('Unable to access the camera. Please ensure permissions are granted.');
             });
     }
 
-    function fallbackToDefaultCamera() {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                console.log('Fallback to default camera successful.');
-            })
-            .catch(error => {
-                console.error('Error accessing any camera:', error);
-            });
+    // Function to show calibration points sequentially
+    function showCalibrationPoint() {
+        if (calibrationStep < totalCalibrationSteps) {
+            const point = calibrationPoints[calibrationStep];
+            point.style.visibility = 'visible';
+            setTimeout(() => {
+                point.style.visibility = 'hidden';
+                calibrationStep++;
+                showCalibrationPoint();
+            }, 2000); // Show each calibration point for 2 seconds
+        } else {
+            console.log('Calibration complete.');
+            calibrationDiv.style.display = 'none';
+            showNextImage(); // Start showing images after calibration
+        }
     }
 
+    // Function to start calibration
+    function startCalibration() {
+        calibrationDiv.style.display = 'flex';
+        showCalibrationPoint();
+    }
+
+    // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        setupCamera(cameraDeviceId);
+        setupCamera();
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
-        fallbackToDefaultCamera();
+        alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
+
+    // Start the calibration process
+    startCalibration();
 };
