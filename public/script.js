@@ -95,6 +95,7 @@ window.onload = async function() {
             calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking.';
             setTimeout(() => {
                 calibrationMessage.innerText = '';
+                demoImage.style.display = 'block';
                 showNextImage(); // Start showing images after calibration
             }, 3000);
         }
