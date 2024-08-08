@@ -1,6 +1,5 @@
 window.onload = function() {
     const videoElement = document.getElementById('webcamVideo');
-    const demoImage = document.getElementById('demoImage');
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
@@ -19,83 +18,69 @@ window.onload = function() {
 
     let currentImageIndex = 0;
     let calibrationStep = 0;
-    const totalCalibrationSteps = 9;
 
-    function showNextImage() {
-        if (currentImageIndex < images.length) {
-            demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000);
-        } else {
-            console.log('Image display cycle complete. Restarting.');
-            currentImageIndex = 0;
-            showNextImage();
-        }
-    }
-
-    function setupWebGazer() {
+    function initializeWebGazer() {
         if (typeof webgazer === 'undefined') {
-            console.error("WebGazer library not loaded. Please check the script path or internet connection.");
+            gazeDataDiv.textContent = "WebGazer library not loaded. Please check the script path or network settings.";
             return;
         }
 
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
-                const x = data.x.toFixed(2);
-                const y = data.y.toFixed(2);
-                gazeDataDiv.textContent = `Gaze coordinates: X ${x}, Y ${y}`;
+                gazeDataDiv.textContent = `Gaze coordinates: X ${data.x.toFixed(2)}, Y ${data.y.toFixed(2)}`;
             }
         }).begin();
 
         webgazer.showVideoPreview(true)
-               .showPredictionPoints(true)
-               .applyKalmanFilter(true)
-               .setVideoElement(videoElement);
+            .showPredictionPoints(true)
+            .applyKalmanFilter(true)
+            .setVideoElement(videoElement);
     }
 
     function setupCamera() {
-        const constraints = { video: true };
-
-        navigator.mediaDevices.getUserMedia(constraints)
+        navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 videoElement.srcObject = stream;
                 videoElement.play();
-                console.log('Camera is active. Initializing WebGazer.');
-                setupWebGazer();
+                initializeWebGazer();
             })
             .catch(error => {
-                console.error('Error accessing the camera:', error);
-                alert('Unable to access the camera. Please ensure permissions are granted and the device has a camera.');
+                gazeDataDiv.textContent = "Error accessing the camera: " + error.message;
             });
     }
 
-    function showCalibrationPoint() {
-        if (calibrationStep < totalCalibrationSteps) {
-            const point = calibrationPoints[calibrationStep];
-            point.style.visibility = 'visible';
-            setTimeout(() => {
-                point.style.visibility = 'hidden';
-                calibrationStep++;
-                showCalibrationPoint();
-            }, 2000);
-        } else {
-            console.log('Calibration complete. Starting image display.');
-            calibrationDiv.style.display = 'none';
-            showNextImage();
+    function cycleImages() {
+        if (currentImageIndex >= images.length) {
+            currentImageIndex = 0; // Loop back to the start
         }
+        document.getElementById('demoImage').src = images[currentImageIndex++];
+        setTimeout(cycleImages, 5000); // Change image every 5 seconds
     }
 
     function startCalibration() {
-        console.log('Starting calibration process...');
         calibrationDiv.style.display = 'flex';
-        showCalibrationPoint();
+        cycleCalibrationPoints();
     }
 
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    function cycleCalibrationPoints() {
+        Array.from(calibrationPoints).forEach((point, index) => {
+            setTimeout(() => {
+                point.style.visibility = (index === calibrationStep % calibrationPoints.length) ? 'visible' : 'hidden';
+            }, 2000 * index);
+        });
+
+        calibrationStep++;
+        if (calibrationStep / calibrationPoints.length < 3) { // Repeat calibration 3 times
+            setTimeout(cycleCalibrationPoints, 2000 * calibrationPoints.length);
+        } else {
+            calibrationDiv.style.display = 'none';
+            cycleImages(); // Start cycling images after calibration
+        }
+    }
+
+    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
         setupCamera();
     } else {
-        console.error('Browser API navigator.mediaDevices.getUserMedia not available.');
-        alert('Your browser does not support camera access features. Please update your browser or switch to a compatible one.');
+        gazeDataDiv.textContent = 'Your browser does not support the necessary API for video capture.';
     }
-
-    startCalibration();
 };
