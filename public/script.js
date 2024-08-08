@@ -7,6 +7,7 @@ window.onload = async function() {
     const cameraSelect = document.getElementById('cameraSelect');
     const startCalibrationButton = document.getElementById('startCalibrationButton');
     const calibrationCompleteMessage = document.getElementById('calibrationCompleteMessage');
+    const trackingInfo = document.getElementById('tracking-info');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -74,6 +75,7 @@ window.onload = async function() {
                 videoElement.play();
                 console.log('Camera is now active.');
                 videoElement.style.display = 'block';
+                trackingInfo.style.display = 'block';
                 setupWebGazer(); // Initialize WebGazer after the camera is active
                 detectFace(); // Start facial tracking
             })
@@ -122,6 +124,13 @@ window.onload = async function() {
             option.text = input.label || `Camera ${index + 1}`;
             cameraSelect.appendChild(option);
         });
+
+        if (videoInputs.length > 0) {
+            cameraSelect.disabled = false;
+            startCalibrationButton.disabled = false;
+        } else {
+            alert('No camera found.');
+        }
     }
 
     cameraSelect.addEventListener('change', () => {
