@@ -4,8 +4,8 @@ window.onload = async function() {
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
-    const cameraSelect = document.getElementById('cameraSelect');
     const calibrationMessage = document.getElementById('calibrationMessage');
+    const cameraSelect = document.getElementById('cameraSelect');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -20,16 +20,18 @@ window.onload = async function() {
     ];
 
     let currentImageIndex = 0;
-    const totalCalibrationSteps = 9;
     let calibrationStep = 0;
+    const totalCalibrationSteps = 9;
 
-    // Function to show next image for eye tracking
+    // Function to show next image
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000); // Change images every 5 seconds
+            setTimeout(showNextImage, 5000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
+            currentImageIndex = 0;
+            showNextImage();
         }
     }
 
@@ -45,7 +47,7 @@ window.onload = async function() {
         }).begin();
 
         webgazer.showVideoPreview(false) // Disable the default video preview
-               .showPredictionPoints(true) // Show prediction points
+               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
                .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
 
         webgazer.setVideoElement(videoElement);
@@ -69,6 +71,7 @@ window.onload = async function() {
                 videoElement.play();
                 console.log('Camera is now active.');
                 setupWebGazer(); // Initialize WebGazer after the camera is active
+                detectFace(); // Start facial tracking
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -91,9 +94,9 @@ window.onload = async function() {
             calibrationDiv.style.display = 'none';
             calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking.';
             setTimeout(() => {
-                calibrationMessage.innerText = ''; // Clear the message
+                calibrationMessage.innerText = '';
                 showNextImage(); // Start showing images after calibration
-            }, 3000); // Delay before starting eye tracking
+            }, 3000);
         }
     }
 
@@ -118,6 +121,28 @@ window.onload = async function() {
     cameraSelect.addEventListener('change', () => {
         setupCamera(cameraSelect.value);
     });
+
+    // Function to detect facial landmarks
+    async function detectFace() {
+        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
+        async function detect() {
+            const predictions = await model.estimateFaces({
+                input: videoElement,
+                returnTensors: false,
+                flipHorizontal: false,
+                predictIrises: true
+            });
+
+            if (predictions.length > 0) {
+                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
+                // Display or process the landmarks as needed
+                console.log('Facial Landmarks:', landmarks);
+            }
+
+            requestAnimationFrame(detect);
+        }
+        detect();
+    }
 
     // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
