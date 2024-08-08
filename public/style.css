@@ -26,6 +26,8 @@ body {
     align-items: center;
     padding: 20px;
     text-align: center;
+    position: relative; /* Added for z-index */
+    z-index: 10; /* Higher z-index to ensure visibility */
 }
 
 header {
@@ -94,6 +96,8 @@ footer {
     text-align: center;
     padding: 10px;
     width: 100%;
+    position: relative; /* Added for z-index */
+    z-index: 10; /* Higher z-index to ensure visibility */
 }
 
 footer p {
@@ -131,6 +135,7 @@ button, select {
     color: white;
     font-size: 1em;
     transition: background-color 0.3s ease;
+    z-index: 10; /* Ensure these elements are on top */
 }
 
 button:hover, select:hover {
@@ -149,4 +154,5 @@ select:disabled {
 button:focus, select:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(98,0,234,0.5);
+    z-index: 10; /* Ensure these elements are on top */
 }

@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function startCalibration() {
+        console.log('Starting calibration...');
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
     }
@@ -117,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoInputs = devices.filter(device => device.kind === 'videoinput');
+            console.log('Video inputs:', videoInputs);
             videoInputs.forEach((input, index) => {
                 const option = document.createElement('option');
                 option.value = input.deviceId;
@@ -125,9 +127,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (videoInputs.length > 0) {
+                console.log('Cameras found, enabling selection and start button.');
                 cameraSelect.disabled = false;
                 startCalibrationButton.disabled = false;
             } else {
+                console.log('No cameras found, disabling selection and start button.');
                 cameraSelect.disabled = true;
                 startCalibrationButton.disabled = true;
                 alert('No camera found.');
@@ -158,6 +162,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
+            console.log('Checking camera permissions...');
             await navigator.mediaDevices.getUserMedia({ video: true });
             await getVideoInputs();
         } catch (error) {
