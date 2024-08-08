@@ -6,8 +6,6 @@ window.onload = async function() {
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const calibrationMessage = document.getElementById('calibrationMessage');
     const cameraSelect = document.getElementById('cameraSelect');
-    const startCalibrationButton = document.getElementById('startCalibrationButton');
-    const startEyeTrackingButton = document.getElementById('startEyeTrackingButton');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -30,7 +28,7 @@ window.onload = async function() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
             demoImage.style.display = 'block';
-            setTimeout(showNextImage, 5000);
+            setTimeout(showNextImage, 20000); // Show each image for 20 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
@@ -95,26 +93,19 @@ window.onload = async function() {
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
-            calibrationMessage.innerText = 'Calibration complete. You can now start eye movement tracking.';
-            startEyeTrackingButton.disabled = false; // Enable the eye tracking button
+            calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking in 30 seconds.';
+            setTimeout(() => {
+                calibrationMessage.innerText = '';
+                startEyeTracking(); // Start eye movement tracking after 30 seconds
+            }, 30000);
         }
     }
 
-    // Function to start calibration
-    startCalibrationButton.addEventListener('click', () => {
-        calibrationDiv.style.display = 'flex';
-        calibrationMessage.innerText = '';
-        startCalibrationButton.disabled = true; // Disable the calibration button during calibration
-        showCalibrationPoint();
-    });
-
     // Function to start eye tracking
-    startEyeTrackingButton.addEventListener('click', () => {
-        calibrationMessage.innerText = '';
+    function startEyeTracking() {
         demoImage.style.display = 'block';
         showNextImage();
-        startEyeTrackingButton.disabled = true; // Disable the eye tracking button once tracking starts
-    });
+    }
 
     // Populate the camera select dropdown
     async function getVideoInputs() {
@@ -163,4 +154,7 @@ window.onload = async function() {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
+
+    // Start the calibration process automatically on load
+    startCalibration();
 };
