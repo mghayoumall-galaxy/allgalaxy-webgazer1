@@ -125,7 +125,8 @@ window.onload = async function() {
     }
 
     cameraSelect.addEventListener('change', () => {
-        setupCamera(cameraSelect.value);
+        const selectedDeviceId = cameraSelect.value;
+        setupCamera(selectedDeviceId);
     });
 
     startCalibrationButton.addEventListener('click', () => {
