@@ -25,7 +25,7 @@
                     <video id="webcamVideo" autoplay playsinline></video> <!-- Web camera feed -->
                 </div>
                 <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image"> <!-- Placeholder for demo image -->
+                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;"> <!-- Placeholder for demo image -->
                 </div>
             </section>
             <div id="gazeData">Waiting for gaze data...</div>
@@ -41,6 +41,9 @@
                 <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
             </div>
+            <div id="calibrationCompleteMessage" style="display: none;">
+                <p>Calibration complete. Starting gaze data collection...</p>
+            </div>
             <div>
                 <label for="cameraSelect">Select Camera: </label>
                 <select id="cameraSelect"></select>
@@ -50,7 +53,5 @@
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>

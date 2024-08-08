@@ -5,6 +5,7 @@ window.onload = async function() {
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const cameraSelect = document.getElementById('cameraSelect');
+    const calibrationCompleteMessage = document.getElementById('calibrationCompleteMessage');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -93,8 +94,13 @@ window.onload = async function() {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
             calibrationComplete = true;
+            calibrationCompleteMessage.style.display = 'block';
             gazeDataDiv.innerText = 'Calibration complete. Starting gaze data collection...';
-            setTimeout(showNextImage, 2000); // Start showing images after calibration
+            setTimeout(() => {
+                calibrationCompleteMessage.style.display = 'none';
+                demoImage.style.display = 'block';
+                showNextImage();
+            }, 2000); // Start showing images after calibration
         }
     }
 
