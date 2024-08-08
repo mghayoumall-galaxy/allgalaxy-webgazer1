@@ -29,9 +29,7 @@ window.onload = async function() {
             demoImage.style.display = 'block';
             setTimeout(showNextImage, 5000); // Display each image for 5 seconds
         } else {
-            console.log('Image display complete. Gaze data collection finished.');
-            demoImage.style.display = 'none';
-            startEyeTracking(); // Start eye tracking after images are shown
+            endSession(); // End session after the last image
         }
     }
 
@@ -104,6 +102,15 @@ window.onload = async function() {
     // Function to start eye tracking
     function startEyeTracking() {
         console.log('Eye movement tracking started.');
+        showNextImage(); // Begin image sequence
+    }
+
+    // Function to end session
+    function endSession() {
+        webgazer.end(); // Stop WebGazer
+        demoImage.style.display = 'none'; // Hide the last image
+        gazeDataDiv.innerText = 'Thank you! The session has ended.';
+        console.log('Eye movement tracking stopped. Session ended.');
     }
 
     // Populate the camera select dropdown
