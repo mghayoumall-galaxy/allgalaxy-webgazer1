@@ -69,7 +69,10 @@ window.onload = async function() {
             videoElement.srcObject = stream;
             await videoElement.play();
             console.log('Camera is now active.');
-            setupWebGazer(); // Initialize WebGazer after the camera is active
+
+            // Initialize WebGazer after the camera is active
+            webgazer.end(); // End any previous instance of WebGazer
+            setupWebGazer();
         } catch (error) {
             console.error('Error accessing the camera:', error);
             alert('Unable to access the camera. Please ensure permissions are granted.');
