@@ -26,6 +26,10 @@ window.onload = async function() {
     const totalCalibrationSteps = 9;
     let calibrationComplete = false;
 
+    // Diagnostic logs
+    console.log('cameraSelect element:', cameraSelect);
+    console.log('startCalibrationButton element:', startCalibrationButton);
+
     function showNextImage() {
         if (calibrationComplete && currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
@@ -66,19 +70,20 @@ window.onload = async function() {
             }
         };
 
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            videoElement.srcObject = stream;
-            videoElement.play();
-            console.log('Camera is now active.');
-            videoElement.style.display = 'block';
-            trackingInfo.style.display = 'block';
-            setupWebGazer();
-            detectFace();
-        } catch (error) {
-            console.error('Error accessing the camera:', error);
-            alert('Unable to access the camera. Please ensure permissions are granted.');
-        }
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                console.log('Camera is now active.');
+                videoElement.style.display = 'block';
+                trackingInfo.style.display = 'block';
+                setupWebGazer();
+                detectFace();
+            })
+            .catch(error => {
+                console.error('Error accessing the camera:', error);
+                alert('Unable to access the camera. Please ensure permissions are granted.');
+            });
     }
 
     function showCalibrationPoint() {
@@ -109,33 +114,31 @@ window.onload = async function() {
     }
 
     async function getVideoInputs() {
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoInputs = devices.filter(device => device.kind === 'videoinput');
-            videoInputs.forEach((input, index) => {
-                const option = document.createElement('option');
-                option.value = input.deviceId;
-                option.text = input.label || `Camera ${index + 1}`;
-                cameraSelect.appendChild(option);
-            });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(device => device.kind === 'videoinput');
+        videoInputs.forEach((input, index) => {
+            const option = document.createElement('option');
+            option.value = input.deviceId;
+            option.text = input.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+        });
 
-            if (videoInputs.length > 0) {
-                cameraSelect.disabled = false;
-                startCalibrationButton.disabled = false;
-            } else {
-                alert('No camera found.');
-            }
-        } catch (error) {
-            console.error('Error enumerating devices:', error);
+        if (videoInputs.length > 0) {
+            cameraSelect.disabled = false;
+            startCalibrationButton.disabled = false;
+        } else {
+            alert('No camera found.');
         }
     }
 
     cameraSelect.addEventListener('change', () => {
+        console.log('Camera selection changed:', cameraSelect.value);
         const selectedDeviceId = cameraSelect.value;
         setupCamera(selectedDeviceId);
     });
 
     startCalibrationButton.addEventListener('click', () => {
+        console.log('Start Calibration button clicked.');
         if (cameraSelect.value) {
             startCalibration();
         } else {
@@ -144,27 +147,23 @@ window.onload = async function() {
     });
 
     async function detectFace() {
-        try {
-            const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
-            async function detect() {
-                const predictions = await model.estimateFaces({
-                    input: videoElement,
-                    returnTensors: false,
-                    flipHorizontal: false,
-                    predictIrises: true
-                });
+        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
+        async function detect() {
+            const predictions = await model.estimateFaces({
+                input: videoElement,
+                returnTensors: false,
+                flipHorizontal: false,
+                predictIrises: true
+            });
 
-                if (predictions.length > 0) {
-                    const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
-                    console.log('Facial Landmarks:', landmarks);
-                }
-
-                requestAnimationFrame(detect);
+            if (predictions.length > 0) {
+                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
+                console.log('Facial Landmarks:', landmarks);
             }
-            detect();
-        } catch (error) {
-            console.error('Error detecting face:', error);
+
+            requestAnimationFrame(detect);
         }
+        detect();
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
