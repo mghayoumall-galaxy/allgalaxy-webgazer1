@@ -26,11 +26,12 @@ window.onload = async function() {
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            setTimeout(showNextImage, 5000);
+            demoImage.style.display = 'block';
+            setTimeout(showNextImage, 5000); // Display each image for 5 seconds
         } else {
             console.log('Image display complete. Gaze data collection finished.');
-            currentImageIndex = 0;
-            showNextImage();
+            demoImage.style.display = 'none';
+            startEyeTracking(); // Start eye tracking after images are shown
         }
     }
 
@@ -70,7 +71,6 @@ window.onload = async function() {
                 videoElement.play();
                 console.log('Camera is now active.');
                 setupWebGazer(); // Initialize WebGazer after the camera is active
-                detectFace(); // Start facial tracking
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -101,6 +101,11 @@ window.onload = async function() {
         showCalibrationPoint();
     }
 
+    // Function to start eye tracking
+    function startEyeTracking() {
+        console.log('Eye movement tracking started.');
+    }
+
     // Populate the camera select dropdown
     async function getVideoInputs() {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -116,28 +121,6 @@ window.onload = async function() {
     cameraSelect.addEventListener('change', () => {
         setupCamera(cameraSelect.value);
     });
-
-    // Function to detect facial landmarks
-    async function detectFace() {
-        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
-        async function detect() {
-            const predictions = await model.estimateFaces({
-                input: videoElement,
-                returnTensors: false,
-                flipHorizontal: false,
-                predictIrises: true
-            });
-
-            if (predictions.length > 0) {
-                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
-                // Display or process the landmarks as needed
-                console.log('Facial Landmarks:', landmarks);
-            }
-
-            requestAnimationFrame(detect);
-        }
-        detect();
-    }
 
     // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
