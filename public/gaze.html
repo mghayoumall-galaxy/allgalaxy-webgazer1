@@ -18,16 +18,21 @@
         <main>
             <section id="intro">
                 <p>Welcome to the Eye and Facial Tracking Demo. Please follow the instructions below to start the tracking process.</p>
-                <p>When prompted, look at the objects in the images shown below the camera feed. Your gaze and facial patterns will be recorded for analysis.</p>
+                <p>First, select your camera from the dropdown list. After selecting the camera, the calibration process will start. Once calibration is complete, instructions will be provided to follow specific objects in the images.</p>
             </section>
-            <section id="tracking-info">
+            <div>
+                <label for="cameraSelect">Select Camera: </label>
+                <select id="cameraSelect"></select>
+                <button id="startCalibrationButton">Start Calibration</button>
+            </div>
+            <div id="tracking-info">
                 <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video> <!-- Web camera feed -->
+                    <video id="webcamVideo" autoplay playsinline style="display: none;"></video> <!-- Web camera feed -->
                 </div>
                 <div id="image-frame">
                     <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;"> <!-- Placeholder for demo image -->
                 </div>
-            </section>
+            </div>
             <div id="gazeData">Waiting for gaze data...</div>
             <div id="calibrationDiv" class="calibration">
                 <!-- Calibration points positioned across the viewport -->
@@ -43,10 +48,6 @@
             </div>
             <div id="calibrationCompleteMessage" style="display: none;">
                 <p>Calibration complete. Starting gaze data collection...</p>
-            </div>
-            <div>
-                <label for="cameraSelect">Select Camera: </label>
-                <select id="cameraSelect"></select>
             </div>
         </main>
         <footer>

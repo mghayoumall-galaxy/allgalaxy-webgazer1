@@ -5,6 +5,7 @@ window.onload = async function() {
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const cameraSelect = document.getElementById('cameraSelect');
+    const startCalibrationButton = document.getElementById('startCalibrationButton');
     const calibrationCompleteMessage = document.getElementById('calibrationCompleteMessage');
     const images = [
         'images/image1.jpg',
@@ -28,6 +29,7 @@ window.onload = async function() {
     function showNextImage() {
         if (calibrationComplete && currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
+            demoImage.style.display = 'block';
             setTimeout(showNextImage, 5000);
         } else if (calibrationComplete) {
             console.log('Image display complete. Gaze data collection finished.');
@@ -71,6 +73,7 @@ window.onload = async function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
+                videoElement.style.display = 'block';
                 setupWebGazer(); // Initialize WebGazer after the camera is active
                 detectFace(); // Start facial tracking
             })
@@ -98,7 +101,6 @@ window.onload = async function() {
             gazeDataDiv.innerText = 'Calibration complete. Starting gaze data collection...';
             setTimeout(() => {
                 calibrationCompleteMessage.style.display = 'none';
-                demoImage.style.display = 'block';
                 showNextImage();
             }, 2000); // Start showing images after calibration
         }
@@ -126,6 +128,14 @@ window.onload = async function() {
         setupCamera(cameraSelect.value);
     });
 
+    startCalibrationButton.addEventListener('click', () => {
+        if (cameraSelect.value) {
+            startCalibration();
+        } else {
+            alert('Please select a camera first.');
+        }
+    });
+
     // Function to detect facial landmarks
     async function detectFace() {
         const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
@@ -150,14 +160,9 @@ window.onload = async function() {
 
     // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        getVideoInputs().then(() => {
-            setupCamera(cameraSelect.value);
-        });
+        getVideoInputs();
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
-
-    // Start the calibration process
-    startCalibration();
 };
