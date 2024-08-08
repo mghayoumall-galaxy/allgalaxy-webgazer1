@@ -18,21 +18,16 @@
         <main>
             <section id="intro">
                 <p>Welcome to the Eye and Facial Tracking Demo. Please follow the instructions below to start the tracking process.</p>
-                <p>First, select your camera from the dropdown list. After selecting the camera, the calibration process will start. Once calibration is complete, instructions will be provided to follow specific objects in the images.</p>
+                <p>When prompted, look at the objects in the images shown below the camera feed. Your gaze and facial patterns will be recorded for analysis.</p>
             </section>
-            <div>
-                <label for="cameraSelect">Select Camera: </label>
-                <select id="cameraSelect"></select>
-                <button id="startCalibrationButton" disabled>Start Calibration</button>
-            </div>
-            <div id="tracking-info" style="display: none;">
+            <section id="tracking-info">
                 <div id="camera-frame">
                     <video id="webcamVideo" autoplay playsinline></video> <!-- Web camera feed -->
                 </div>
                 <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;"> <!-- Placeholder for demo image -->
+                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image"> <!-- Placeholder for demo image -->
                 </div>
-            </div>
+            </section>
             <div id="gazeData">Waiting for gaze data...</div>
             <div id="calibrationDiv" class="calibration">
                 <!-- Calibration points positioned across the viewport -->
@@ -46,13 +41,16 @@
                 <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
             </div>
-            <div id="calibrationCompleteMessage" style="display: none;">
-                <p>Calibration complete. Starting gaze data collection...</p>
+            <div>
+                <label for="cameraSelect">Select Camera: </label>
+                <select id="cameraSelect"></select>
             </div>
         </main>
         <footer>
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

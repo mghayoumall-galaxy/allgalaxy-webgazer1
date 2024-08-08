@@ -1,13 +1,10 @@
-document.addEventListener('DOMContentLoaded', async function() {
+window.onload = async function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
     const cameraSelect = document.getElementById('cameraSelect');
-    const startCalibrationButton = document.getElementById('startCalibrationButton');
-    const calibrationCompleteMessage = document.getElementById('calibrationCompleteMessage');
-    const trackingInfo = document.getElementById('tracking-info');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -24,24 +21,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     let currentImageIndex = 0;
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
-    let calibrationComplete = false;
 
-    // Diagnostic logs
-    console.log('cameraSelect element:', cameraSelect);
-    console.log('startCalibrationButton element:', startCalibrationButton);
-
+    // Function to show next image
     function showNextImage() {
-        if (calibrationComplete && currentImageIndex < images.length) {
+        if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
-            demoImage.style.display = 'block';
             setTimeout(showNextImage, 5000);
-        } else if (calibrationComplete) {
+        } else {
             console.log('Image display complete. Gaze data collection finished.');
             currentImageIndex = 0;
             showNextImage();
         }
     }
 
+    // Function to initialize WebGazer
     function setupWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
@@ -52,13 +45,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }).begin();
 
-        webgazer.showVideoPreview(false)
-               .showPredictionPoints(true)
-               .applyKalmanFilter(true);
+        webgazer.showVideoPreview(false) // Disable the default video preview
+               .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
+               .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
 
         webgazer.setVideoElement(videoElement);
     }
 
+    // Function to setup the camera
     async function setupCamera(deviceId) {
         if (videoElement.srcObject) {
             videoElement.srcObject.getTracks().forEach(track => track.stop());
@@ -75,10 +69,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
-                videoElement.style.display = 'block';
-                trackingInfo.style.display = 'block';
-                setupWebGazer();
-                detectFace();
+                setupWebGazer(); // Initialize WebGazer after the camera is active
+                detectFace(); // Start facial tracking
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -86,6 +78,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
     }
 
+    // Function to show calibration points sequentially
     function showCalibrationPoint() {
         if (calibrationStep < totalCalibrationSteps) {
             const point = calibrationPoints[calibrationStep];
@@ -94,83 +87,68 @@ document.addEventListener('DOMContentLoaded', async function() {
                 point.style.visibility = 'hidden';
                 calibrationStep++;
                 showCalibrationPoint();
-            }, 2000);
+            }, 2000); // Show each calibration point for 2 seconds
         } else {
             console.log('Calibration complete.');
             calibrationDiv.style.display = 'none';
-            calibrationComplete = true;
-            calibrationCompleteMessage.style.display = 'block';
-            gazeDataDiv.innerText = 'Calibration complete. Starting gaze data collection...';
-            setTimeout(() => {
-                calibrationCompleteMessage.style.display = 'none';
-                showNextImage();
-            }, 2000);
+            showNextImage(); // Start showing images after calibration
         }
     }
 
+    // Function to start calibration
     function startCalibration() {
-        console.log('Starting calibration...');
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
     }
 
+    // Populate the camera select dropdown
     async function getVideoInputs() {
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoInputs = devices.filter(device => device.kind === 'videoinput');
-            console.log('Video inputs:', videoInputs);
-            videoInputs.forEach((input, index) => {
-                const option = document.createElement('option');
-                option.value = input.deviceId;
-                option.text = input.label || `Camera ${index + 1}`;
-                cameraSelect.appendChild(option);
-            });
-
-            if (videoInputs.length > 0) {
-                console.log('Cameras found, enabling selection and start button.');
-                cameraSelect.disabled = false;
-                startCalibrationButton.disabled = false;
-            } else {
-                console.log('No cameras found, disabling selection and start button.');
-                cameraSelect.disabled = true;
-                startCalibrationButton.disabled = true;
-                alert('No camera found.');
-            }
-        } catch (error) {
-            console.error('Error accessing media devices:', error);
-            alert('Failed to access media devices. Please check camera permissions.');
-        }
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(device => device.kind === 'videoinput');
+        videoInputs.forEach((input, index) => {
+            const option = document.createElement('option');
+            option.value = input.deviceId;
+            option.text = input.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+        });
     }
 
-    cameraSelect.addEventListener('change', function() {
-        console.log('Camera selection changed:', cameraSelect.value);
-        if (cameraSelect.value) {
-            setupCamera(cameraSelect.value);
-        } else {
-            console.warn('No camera ID found in the value.');
-        }
+    cameraSelect.addEventListener('change', () => {
+        setupCamera(cameraSelect.value);
     });
 
-    startCalibrationButton.addEventListener('click', function() {
-        console.log('Calibration button clicked.');
-        if (!startCalibrationButton.disabled) {
-            startCalibration();
-        } else {
-            console.warn('Button is disabled at the time of click.');
-        }
-    });
+    // Function to detect facial landmarks
+    async function detectFace() {
+        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
+        async function detect() {
+            const predictions = await model.estimateFaces({
+                input: videoElement,
+                returnTensors: false,
+                flipHorizontal: false,
+                predictIrises: true
+            });
 
+            if (predictions.length > 0) {
+                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
+                // Display or process the landmarks as needed
+                console.log('Facial Landmarks:', landmarks);
+            }
+
+            requestAnimationFrame(detect);
+        }
+        detect();
+    }
+
+    // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-            console.log('Checking camera permissions...');
-            await navigator.mediaDevices.getUserMedia({ video: true });
-            await getVideoInputs();
-        } catch (error) {
-            console.error('Error accessing the camera:', error);
-            alert('Unable to access the camera. Please ensure permissions are granted.');
-        }
+        getVideoInputs().then(() => {
+            setupCamera(cameraSelect.value);
+        });
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
-});
+
+    // Start the calibration process
+    startCalibration();
+};
