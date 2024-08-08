@@ -34,11 +34,8 @@ window.onload = async function() {
         }
     }
 
-    // Function to setup WebGazer
-    function setupWebGazer() {
-        webgazer.clearData();
-        webgazer.end();
-
+    // Function to initialize WebGazer
+    function initializeWebGazer() {
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -51,7 +48,20 @@ window.onload = async function() {
         webgazer.showVideoPreview(false) // Disable the default video preview
                .showPredictionPoints(true) // Shows where WebGazer is predicting the user is looking
                .applyKalmanFilter(true); // Apply Kalman filter for smoother tracking
+    }
 
+    // Function to stop WebGazer
+    function stopWebGazer() {
+        if (webgazer.isReady()) {
+            webgazer.clearData();
+            webgazer.end();
+        }
+    }
+
+    // Function to setup WebGazer with the correct video element
+    function setupWebGazer() {
+        stopWebGazer();
+        initializeWebGazer();
         webgazer.setVideoElement(videoElement);
     }
 
@@ -72,9 +82,7 @@ window.onload = async function() {
             videoElement.srcObject = stream;
             await videoElement.play();
             console.log('Camera is now active.');
-
             setupWebGazer(); // Initialize WebGazer after the camera is active
-            detectFace(); // Start facial tracking
         } catch (error) {
             console.error('Error accessing the camera:', error);
             alert('Unable to access the camera. Please ensure permissions are granted.');
