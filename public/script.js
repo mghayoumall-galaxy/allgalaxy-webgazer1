@@ -4,6 +4,7 @@ window.onload = function() {
     const gazeDataDiv = document.getElementById('gazeData');
     const calibrationDiv = document.getElementById('calibrationDiv');
     const calibrationPoints = document.getElementsByClassName('calibrationPoint');
+    const cameraSelect = document.getElementById('cameraSelect');
     const images = [
         'images/image1.jpg',
         'images/image2.jpg',
@@ -52,9 +53,15 @@ window.onload = function() {
     }
 
     // Function to setup the camera
-    function setupCamera() {
+    async function setupCamera(deviceId) {
+        if (videoElement.srcObject) {
+            videoElement.srcObject.getTracks().forEach(track => track.stop());
+        }
+
         const constraints = {
-            video: true
+            video: {
+                deviceId: deviceId ? { exact: deviceId } : undefined
+            }
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
@@ -93,9 +100,27 @@ window.onload = function() {
         showCalibrationPoint();
     }
 
+    // Populate the camera select dropdown
+    async function getVideoInputs() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(device => device.kind === 'videoinput');
+        videoInputs.forEach((input, index) => {
+            const option = document.createElement('option');
+            option.value = input.deviceId;
+            option.text = input.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+        });
+    }
+
+    cameraSelect.addEventListener('change', () => {
+        setupCamera(cameraSelect.value);
+    });
+
     // Ensure the browser supports the required features
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        setupCamera();
+        getVideoInputs().then(() => {
+            setupCamera(cameraSelect.value);
+        });
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
