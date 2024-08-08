@@ -36,9 +36,6 @@ window.onload = async function() {
 
     // Function to initialize WebGazer
     function setupWebGazer() {
-        webgazer.clearData(); // Clear any previous data
-        webgazer.end(); // End any previous instance of WebGazer
-
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -67,18 +64,16 @@ window.onload = async function() {
             }
         };
 
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                console.log('Camera is now active.');
-                setupWebGazer(); // Initialize WebGazer after the camera is active
-                detectFace(); // Start facial tracking
-            })
-            .catch(error => {
-                console.error('Error accessing the camera:', error);
-                alert('Unable to access the camera. Please ensure permissions are granted.');
-            });
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoElement.srcObject = stream;
+            await videoElement.play();
+            console.log('Camera is now active.');
+            setupWebGazer(); // Initialize WebGazer after the camera is active
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
+            alert('Unable to access the camera. Please ensure permissions are granted.');
+        }
     }
 
     // Function to show calibration points sequentially
