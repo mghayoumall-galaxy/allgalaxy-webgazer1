@@ -1,4 +1,4 @@
-window.onload = async function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const videoElement = document.getElementById('webcamVideo');
     const demoImage = document.getElementById('demoImage');
     const gazeDataDiv = document.getElementById('gazeData');
@@ -114,62 +114,58 @@ window.onload = async function() {
     }
 
     async function getVideoInputs() {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoInputs = devices.filter(device => device.kind === 'videoinput');
-        videoInputs.forEach((input, index) => {
-            const option = document.createElement('option');
-            option.value = input.deviceId;
-            option.text = input.label || `Camera ${index + 1}`;
-            cameraSelect.appendChild(option);
-        });
-
-        if (videoInputs.length > 0) {
-            cameraSelect.disabled = false;
-            startCalibrationButton.disabled = false;
-        } else {
-            alert('No camera found.');
-        }
-    }
-
-    cameraSelect.addEventListener('change', () => {
-        console.log('Camera selection changed:', cameraSelect.value);
-        const selectedDeviceId = cameraSelect.value;
-        setupCamera(selectedDeviceId);
-    });
-
-    startCalibrationButton.addEventListener('click', () => {
-        console.log('Start Calibration button clicked.');
-        if (cameraSelect.value) {
-            startCalibration();
-        } else {
-            alert('Please select a camera first.');
-        }
-    });
-
-    async function detectFace() {
-        const model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
-        async function detect() {
-            const predictions = await model.estimateFaces({
-                input: videoElement,
-                returnTensors: false,
-                flipHorizontal: false,
-                predictIrises: true
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoInputs = devices.filter(device => device.kind === 'videoinput');
+            videoInputs.forEach((input, index) => {
+                const option = document.createElement('option');
+                option.value = input.deviceId;
+                option.text = input.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
             });
 
-            if (predictions.length > 0) {
-                const landmarks = predictions[0].keypoints.map(point => point.slice(0, 2));
-                console.log('Facial Landmarks:', landmarks);
+            if (videoInputs.length > 0) {
+                cameraSelect.disabled = false;
+                startCalibrationButton.disabled = false;
+            } else {
+                cameraSelect.disabled = true;
+                startCalibrationButton.disabled = true;
+                alert('No camera found.');
             }
-
-            requestAnimationFrame(detect);
+        } catch (error) {
+            console.error('Error accessing media devices:', error);
+            alert('Failed to access media devices. Please check camera permissions.');
         }
-        detect();
     }
 
+    cameraSelect.addEventListener('change', function() {
+        console.log('Camera selection changed:', cameraSelect.value);
+        if (cameraSelect.value) {
+            setupCamera(cameraSelect.value);
+        } else {
+            console.warn('No camera ID found in the value.');
+        }
+    });
+
+    startCalibrationButton.addEventListener('click', function() {
+        console.log('Calibration button clicked.');
+        if (!startCalibrationButton.disabled) {
+            startCalibration();
+        } else {
+            console.warn('Button is disabled at the time of click.');
+        }
+    });
+
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        await getVideoInputs();
+        try {
+            await navigator.mediaDevices.getUserMedia({ video: true });
+            await getVideoInputs();
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
+            alert('Unable to access the camera. Please ensure permissions are granted.');
+        }
     } else {
         console.error('Browser API navigator.mediaDevices.getUserMedia not available');
         alert('Your browser does not support the required features. Try updating or switching browsers.');
     }
-};
+});
