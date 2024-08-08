@@ -27,6 +27,7 @@ window.onload = async function() {
     function showNextImage() {
         if (currentImageIndex < images.length) {
             demoImage.src = images[currentImageIndex++];
+            demoImage.style.display = 'block';
             setTimeout(showNextImage, 5000);
         } else {
             console.log('Image display complete. Gaze data collection finished.');
@@ -95,8 +96,7 @@ window.onload = async function() {
             calibrationMessage.innerText = 'Calibration complete. Starting eye movement tracking.';
             setTimeout(() => {
                 calibrationMessage.innerText = '';
-                demoImage.style.display = 'block';
-                showNextImage(); // Start showing images after calibration
+                startEyeTracking(); // Start eye movement tracking after displaying the message
             }, 3000);
         }
     }
@@ -105,6 +105,12 @@ window.onload = async function() {
     function startCalibration() {
         calibrationDiv.style.display = 'flex';
         showCalibrationPoint();
+    }
+
+    // Function to start eye tracking
+    function startEyeTracking() {
+        demoImage.style.display = 'block';
+        showNextImage();
     }
 
     // Populate the camera select dropdown
