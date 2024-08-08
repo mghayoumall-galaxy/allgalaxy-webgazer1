@@ -34,8 +34,11 @@ window.onload = async function() {
         }
     }
 
-    // Function to initialize WebGazer
+    // Function to setup WebGazer
     function setupWebGazer() {
+        webgazer.clearData();
+        webgazer.end();
+
         webgazer.setGazeListener(function(data, elapsedTime) {
             if (data) {
                 const x = data.x;
@@ -70,9 +73,8 @@ window.onload = async function() {
             await videoElement.play();
             console.log('Camera is now active.');
 
-            // Initialize WebGazer after the camera is active
-            webgazer.end(); // End any previous instance of WebGazer
-            setupWebGazer();
+            setupWebGazer(); // Initialize WebGazer after the camera is active
+            detectFace(); // Start facial tracking
         } catch (error) {
             console.error('Error accessing the camera:', error);
             alert('Unable to access the camera. Please ensure permissions are granted.');
