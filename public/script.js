@@ -21,6 +21,8 @@ window.onload = async function() {
     let currentImageIndex = 0;
     let calibrationStep = 0;
     const totalCalibrationSteps = 9;
+    let gazeData = [];
+    let startTime;
 
     // Function to show next image
     function showNextImage() {
@@ -39,8 +41,22 @@ window.onload = async function() {
             if (data) {
                 const x = data.x;
                 const y = data.y;
+                const timestamp = performance.now() - startTime;
+                
+                // Calculate and store gaze metrics
+                gazeData.push({ eyeX: x, eyeY: y, timestamp });
+
+                // Example: Calculate fixation duration (if gaze stays within a threshold area)
+                const lastGaze = gazeData[gazeData.length - 2];
+                if (lastGaze) {
+                    const distance = Math.sqrt(Math.pow(x - lastGaze.eyeX, 2) + Math.pow(y - lastGaze.eyeY, 2));
+                    if (distance < 50) { // Assume 50 pixels as a threshold for fixation
+                        lastGaze.duration = timestamp - lastGaze.timestamp;
+                    }
+                }
+
                 gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
-                console.log(`Gaze coordinates: (${x}, ${y})`);
+                console.log(`Gaze coordinates: (${x}, ${y}), Time: ${timestamp}`);
             }
         }).begin();
 
@@ -69,6 +85,7 @@ window.onload = async function() {
                 videoElement.play();
                 console.log('Camera is now active.');
                 setupWebGazer(); // Initialize WebGazer after the camera is active
+                startTime = performance.now(); // Start timing for data collection
             })
             .catch(error => {
                 console.error('Error accessing the camera:', error);
@@ -111,6 +128,17 @@ window.onload = async function() {
         demoImage.style.display = 'none'; // Hide the last image
         gazeDataDiv.innerText = 'Thank you! The session has ended.';
         console.log('Eye movement tracking stopped. Session ended.');
+
+        // Send collected data to the server
+        fetch('/save-gaze-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gazeData)
+        }).then(response => response.text())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
     }
 
     // Populate the camera select dropdown
