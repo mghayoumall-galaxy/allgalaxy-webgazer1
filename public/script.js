@@ -26,6 +26,9 @@ window.onload = async function() {
     let eyeMovementErrors = [];
     let startTime;
 
+    // Dynamic threshold based on screen size
+    const dynamicThreshold = Math.min(window.innerWidth, window.innerHeight) * 0.05; // 5% of the smaller screen dimension
+
     // Function to display the next image in the sequence
     function showNextImage() {
         if (currentImageIndex < images.length) {
@@ -105,8 +108,8 @@ window.onload = async function() {
                     calibrationData.push({ 
                         eyeX: data.x, 
                         eyeY: data.y, 
-                        targetX: parseFloat(point.style.left), 
-                        targetY: parseFloat(point.style.top)
+                        targetX: point.getBoundingClientRect().left + point.offsetWidth / 2,
+                        targetY: point.getBoundingClientRect().top + point.offsetHeight / 2
                     });
                 }
             });
@@ -126,7 +129,6 @@ window.onload = async function() {
 
     // Function to verify calibration accuracy
     function verifyCalibration(data) {
-        const threshold = 50; // Pixel threshold for accuracy
         let calibrationErrors = [];
 
         data.forEach(point => {
@@ -137,7 +139,7 @@ window.onload = async function() {
         const averageError = calibrationErrors.reduce((acc, val) => acc + val, 0) / calibrationErrors.length;
         console.log(`Average calibration error: ${averageError}px`);
 
-        if (averageError > threshold) {
+        if (averageError > dynamicThreshold) {
             console.log('Calibration is not accurate enough. Please recalibrate.');
             alert('Calibration accuracy is low. Consider recalibrating.');
         } else {
@@ -146,27 +148,20 @@ window.onload = async function() {
     }
 
     // Function to verify eye movement accuracy during tracking
-    function verifyEyeMovement() {
-        const threshold = 100; // Example threshold for eye movement verification
-
-        // Assume target positions (for demo purposes, normally would be dynamic)
-        const targetPositions = [
-            { x: 100, y: 100 },
-            { x: 400, y: 300 },
-            { x: 600, y: 400 }
-        ];
+    function verifyEyeMovement(targetPositions) {
+        let movementErrors = [];
 
         gazeData.forEach((gaze, index) => {
             if (targetPositions[index]) {
                 const distance = Math.hypot(gaze.eyeX - targetPositions[index].x, gaze.eyeY - targetPositions[index].y);
-                eyeMovementErrors.push(distance);
+                movementErrors.push(distance);
             }
         });
 
-        const averageMovementError = eyeMovementErrors.reduce((acc, val) => acc + val, 0) / eyeMovementErrors.length;
+        const averageMovementError = movementErrors.reduce((acc, val) => acc + val, 0) / movementErrors.length;
         console.log(`Average eye movement error: ${averageMovementError}px`);
 
-        if (averageMovementError > threshold) {
+        if (averageMovementError > dynamicThreshold) {
             console.log('Eye movement tracking is not accurate enough.');
             alert('Eye movement accuracy is low. Consider recalibrating.');
         } else {
@@ -195,8 +190,14 @@ window.onload = async function() {
         gazeDataDiv.innerText = 'Thank you! The session has ended.';
         console.log('Eye movement tracking stopped. Session ended.');
 
-        // Verify eye movement accuracy before saving data
-        verifyEyeMovement();
+        // Verify eye movement accuracy with dynamic or expected target positions
+        const expectedTargetPositions = images.map((img, index) => {
+            return {
+                x: window.innerWidth / 2,  // Example expected x position (center)
+                y: window.innerHeight / 2  // Example expected y position (center)
+            };
+        });
+        verifyEyeMovement(expectedTargetPositions);
 
         // Send collected data to the server
         fetch('/save-gaze-data', {
