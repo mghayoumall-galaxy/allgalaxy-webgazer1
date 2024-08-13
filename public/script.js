@@ -2,10 +2,8 @@ window.onload = function() {
     const path = window.location.pathname;
 
     if (path.endsWith("gaze.html")) {
-        // Code for the welcome page (gaze.html)
         console.log('Welcome page loaded');
     } else if (path.endsWith("gaze1.html")) {
-        // Code for the biography and eligibility check page (gaze1.html)
         console.log('User information page loaded');
         document.getElementById('userInfoForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -19,15 +17,17 @@ window.onload = function() {
             }
         });
     } else if (path.endsWith("gaze3.html")) {
-        // Code for the eye movement data collection page (gaze3.html)
         console.log('Eye movement data collection page loaded');
-        
+
         const videoElement = document.getElementById('webcamVideo');
         const demoImage = document.getElementById('demoImage');
         const gazeDataDiv = document.getElementById('gazeData');
         const calibrationDiv = document.getElementById('calibrationDiv');
         const calibrationPoints = document.getElementsByClassName('calibrationPoint');
         const cameraSelect = document.getElementById('cameraSelect');
+        const errorMessage = document.getElementById('errorMessage');
+        const startCalibrationButton = document.getElementById('startCalibrationButton');
+        const trackingInfo = document.getElementById('tracking-info');
         const images = [
             'images/image1.jpg',
             'images/image2.jpg',
@@ -46,58 +46,49 @@ window.onload = function() {
         const totalCalibrationSteps = calibrationPoints.length;
         let gazeData = [];
         let calibrationData = [];
-        let eyeMovementErrors = [];
         let startTime;
 
-        // Dynamic threshold based on screen size
         const dynamicThreshold = Math.min(window.innerWidth, window.innerHeight) * 0.05;
 
-        // Function to display the next image in the sequence
         function showNextImage() {
             if (currentImageIndex < images.length) {
                 demoImage.src = images[currentImageIndex++];
                 demoImage.style.display = 'block';
-                setTimeout(showNextImage, 5000); // Display each image for 5 seconds
+                setTimeout(showNextImage, 5000);
             } else {
-                endSession(); // End session after the last image
+                endSession();
             }
         }
 
-        // Function to initialize WebGazer
         function setupWebGazer() {
             webgazer.setGazeListener((data) => {
                 if (data) {
                     const { x, y } = data;
                     const timestamp = performance.now() - startTime;
 
-                    // Store gaze data
                     gazeData.push({ eyeX: x, eyeY: y, timestamp });
 
-                    // Calculate fixation duration if gaze stays within a threshold area
                     const lastGaze = gazeData[gazeData.length - 2];
                     if (lastGaze) {
                         const distance = Math.hypot(x - lastGaze.eyeX, y - lastGaze.eyeY);
-                        if (distance < 50) { // Threshold for fixation
+                        if (distance < 50) {
                             lastGaze.duration = timestamp - lastGaze.timestamp;
                         }
                     }
 
-                    // Update gaze data display
                     gazeDataDiv.innerText = `Gaze coordinates: X ${x}, Y ${y}`;
                     console.log(`Gaze coordinates: (${x}, ${y}), Time: ${timestamp}`);
                 }
             }).begin();
 
-            webgazer.showVideoPreview(false)  // Disable default video preview
-                   .showPredictionPoints(true) // Show prediction points on screen
-                   .applyKalmanFilter(true);    // Apply Kalman filter for smoother tracking
+            webgazer.showVideoPreview(false)
+                   .showPredictionPoints(true)
+                   .applyKalmanFilter(true);
 
             webgazer.setVideoElement(videoElement);
         }
 
-        // Function to setup the camera
         async function setupCamera(deviceId) {
-            // Stop any existing camera stream
             if (videoElement.srcObject) {
                 videoElement.srcObject.getTracks().forEach(track => track.stop());
             }
@@ -111,21 +102,20 @@ window.onload = function() {
                 videoElement.srcObject = stream;
                 videoElement.play();
                 console.log('Camera is now active.');
-                setupWebGazer(); // Initialize WebGazer after the camera is active
-                startTime = performance.now(); // Start timing for data collection
+                setupWebGazer();
+                startTime = performance.now();
             } catch (error) {
                 console.error('Error accessing the camera:', error);
-                alert('Unable to access the camera. Please ensure permissions are granted.');
+                errorMessage.innerText = 'Unable to access the camera. Please ensure permissions are granted.';
+                errorMessage.style.display = 'block';
             }
         }
 
-        // Function to display calibration points sequentially
         function showCalibrationPoint() {
             if (calibrationStep < totalCalibrationSteps) {
                 const point = calibrationPoints[calibrationStep];
                 point.style.visibility = 'visible';
 
-                // Collect gaze data during calibration
                 webgazer.setGazeListener((data) => {
                     if (data) {
                         calibrationData.push({ 
@@ -141,19 +131,18 @@ window.onload = function() {
                     point.style.visibility = 'hidden';
                     calibrationStep++;
                     showCalibrationPoint();
-                }, 2000); // Show each calibration point for 2 seconds
+                }, 2000);
             } else {
                 console.log('Calibration complete.');
                 calibrationDiv.style.display = 'none';
-                verifyCalibration(calibrationData); // Verify calibration accuracy
-                showNextImage(); // Start showing images after calibration
+                verifyCalibration(calibrationData);
+                trackingInfo.style.display = 'block';
+                showNextImage();
             }
         }
 
-        // Function to verify calibration accuracy
         function verifyCalibration(data) {
             let calibrationErrors = [];
-
             data.forEach(point => {
                 const distance = Math.hypot(point.eyeX - point.targetX, point.eyeY - point.targetY);
                 calibrationErrors.push(distance);
@@ -170,59 +159,20 @@ window.onload = function() {
             }
         }
 
-        // Function to verify eye movement accuracy during tracking
-        function verifyEyeMovement(targetPositions) {
-            let movementErrors = [];
-
-            gazeData.forEach((gaze, index) => {
-                if (targetPositions[index]) {
-                    const distance = Math.hypot(gaze.eyeX - targetPositions[index].x, gaze.eyeY - targetPositions[index].y);
-                    movementErrors.push(distance);
-                }
-            });
-
-            const averageMovementError = movementErrors.reduce((acc, val) => acc + val, 0) / movementErrors.length;
-            console.log(`Average eye movement error: ${averageMovementError}px`);
-
-            if (averageMovementError > dynamicThreshold) {
-                console.log('Eye movement tracking is not accurate enough.');
-                alert('Eye movement accuracy is low. Consider recalibrating.');
-            } else {
-                console.log('Eye movement tracking is accurate.');
-            }
-        }
-
-        // Function to start calibration
-        function startCalibration() {
-            calibrationDiv.style.display = 'flex';
-            calibrationStep = 0; // Reset calibration step counter
-            calibrationData = []; // Reset calibration data
-            showCalibrationPoint();
-        }
-
-        // Function to start eye tracking
-        function startEyeTracking() {
-            console.log('Eye movement tracking started.');
-            showNextImage(); // Begin image sequence
-        }
-
-        // Function to end session and send data to the server
         function endSession() {
-            webgazer.end(); // Stop WebGazer
-            demoImage.style.display = 'none'; // Hide the last image
+            webgazer.end();
+            demoImage.style.display = 'none';
             gazeDataDiv.innerText = 'Thank you! The session has ended.';
             console.log('Eye movement tracking stopped. Session ended.');
 
-            // Verify eye movement accuracy with dynamic or expected target positions
             const expectedTargetPositions = images.map((img, index) => {
                 return {
-                    x: window.innerWidth / 2,  // Example expected x position (center)
-                    y: window.innerHeight / 2  // Example expected y position (center)
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2
                 };
             });
             verifyEyeMovement(expectedTargetPositions);
 
-            // Send collected data to the server
             fetch('/save-gaze-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -232,13 +182,12 @@ window.onload = function() {
               .catch(error => console.error('Error:', error));
         }
 
-        // Function to populate the camera select dropdown
         async function populateCameraSelect() {
             try {
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const videoInputs = devices.filter(device => device.kind === 'videoinput');
 
-                cameraSelect.innerHTML = ''; // Clear previous options
+                cameraSelect.innerHTML = '';
                 videoInputs.forEach((input, index) => {
                     const option = document.createElement('option');
                     option.value = input.deviceId;
@@ -246,27 +195,34 @@ window.onload = function() {
                     cameraSelect.appendChild(option);
                 });
 
-                // Automatically select the first camera if available
                 if (videoInputs.length > 0) {
                     setupCamera(videoInputs[0].deviceId);
+                } else {
+                    errorMessage.innerText = 'No cameras found. Please connect a camera and try again.';
+                    errorMessage.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error fetching video input devices:', error);
+                errorMessage.innerText = 'Error fetching video input devices. Please try again.';
+                errorMessage.style.display = 'block';
             }
         }
 
-        // Event listener for camera selection change
         cameraSelect.addEventListener('change', () => {
             setupCamera(cameraSelect.value);
         });
 
-        // Ensure the browser supports required features and start the process
+        startCalibrationButton.addEventListener('click', () => {
+            calibrationDiv.style.display = 'flex';
+            startCalibration();
+        });
+
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            await populateCameraSelect();
-            startCalibration(); // Start calibration immediately after camera setup
+            populateCameraSelect();
         } else {
             console.error('Browser API navigator.mediaDevices.getUserMedia not available');
-            alert('Your browser does not support the required features. Try updating or switching browsers.');
+            errorMessage.innerText = 'Your browser does not support the required features. Try updating or switching browsers.';
+            errorMessage.style.display = 'block';
         }
     }
 };
