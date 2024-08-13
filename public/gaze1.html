@@ -34,17 +34,18 @@
     </div>
 
     <script>
-        document.getElementById('userInfoForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const age = document.getElementById('age').value;
-            const healthCondition = document.getElementById('healthCondition').value.toLowerCase();
+document.getElementById('userInfoForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const age = document.getElementById('age').value;
+    const healthCondition = document.getElementById('healthCondition').value.toLowerCase();
 
-            if (age < 50 || healthCondition.includes('cataracts') || healthCondition.includes('glaucoma')) {
-                document.getElementById('eligibilityMessage').innerText = 'Unfortunately, you are not eligible for this study.';
-            } else {
-                window.location.href = 'gaze3.html';
-            }
-        });
+    if (age < 50 || healthCondition.includes('cataracts') || healthCondition.includes('glaucoma')) {
+        document.getElementById('eligibilityMessage').innerText = 'Unfortunately, you are not eligible for this study.';
+    } else {
+        window.location.href = 'gaze3.html';
+    }
+});
+
     </script>
 </body>
 </html>
