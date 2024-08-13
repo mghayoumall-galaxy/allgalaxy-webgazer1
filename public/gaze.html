@@ -11,46 +11,138 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Eye Movement Data Collection</h1>
-        </header>
-        <main>
-            <section id="intro">
-                <p>Welcome to the Eye Movement Data Collection Demo. Follow the instructions below to start the tracking process.</p>
-                <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
-            </section>
-            <section id="tracking-info">
-                <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video>
-                </div>
-                <div id="image-frame-container">
-                    <div id="image-frame">
-                        <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;">
+        <!-- Welcome Page -->
+        <section id="welcomePage" class="page active">
+            <header>
+                <h1>Welcome to the Eye Movement Data Collection Project</h1>
+            </header>
+            <main>
+                <p>This project aims to collect data on eye movement patterns to better understand and diagnose various conditions.</p>
+                <p>Please click the button below to begin.</p>
+                <button id="startBtn">Start</button>
+            </main>
+        </section>
+
+        <!-- User Information Page -->
+        <section id="userInfoPage" class="page">
+            <header>
+                <h1>User Information</h1>
+            </header>
+            <main>
+                <p>Please provide the following information:</p>
+                <form id="userInfoForm">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" required><br>
+                    <label for="sex">Sex:</label>
+                    <select id="sex" name="sex" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select><br>
+                    <label for="healthCondition">Do you have any known eye conditions? (e.g., cataracts, glaucoma)</label>
+                    <input type="text" id="healthCondition" name="healthCondition" required><br>
+                    <button type="submit">Submit</button>
+                </form>
+                <div id="eligibilityMessage"></div>
+            </main>
+        </section>
+
+        <!-- Instructions Page -->
+        <section id="instructionsPage" class="page">
+            <header>
+                <h1>Instructions</h1>
+            </header>
+            <main>
+                <p>Follow the instructions on the next screen to track your eye movements.</p>
+                <p>The process will take approximately 5 minutes.</p>
+                <button id="proceedToTracking">Proceed to Tracking</button>
+            </main>
+        </section>
+
+        <!-- Eye Movement Data Collection Page -->
+        <section id="trackingPage" class="page">
+            <header>
+                <h1>Eye Movement Data Collection</h1>
+            </header>
+            <main>
+                <section id="tracking-info">
+                    <div id="camera-frame">
+                        <video id="webcamVideo" autoplay playsinline></video>
                     </div>
-                    <div id="image-mask"></div>
+                    <div id="image-frame-container">
+                        <div id="image-frame">
+                            <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;">
+                        </div>
+                        <div id="image-mask"></div>
+                    </div>
+                </section>
+                <div id="gazeData">Waiting for gaze data...</div>
+                <div id="calibrationDiv" class="calibration">
+                    <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
+                    <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
+                    <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
+                    <div class="calibrationPoint" id="point4" style="top: 50%; left: 10%;"></div>
+                    <div class="calibrationPoint" id="point5" style="top: 50%; left: 50%;"></div>
+                    <div class="calibrationPoint" id="point6" style="top: 50%; left: 90%;"></div>
+                    <div class="calibrationPoint" id="point7" style="top: 90%; left: 10%;"></div>
+                    <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
+                    <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
                 </div>
-            </section>
-            <div id="gazeData">Waiting for gaze data...</div>
-            <div id="calibrationDiv" class="calibration">
-                <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
-                <div class="calibrationPoint" id="point4" style="top: 50%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point5" style="top: 50%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point6" style="top: 50%; left: 90%;"></div>
-                <div class="calibrationPoint" id="point7" style="top: 90%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
-            </div>
-            <div id="calibrationMessage"></div>
-            <div id="cameraSelectContainer">
-                <label for="cameraSelect">Select Camera: </label>
-                <select id="cameraSelect"></select>
-            </div>
-        </main>
+                <div id="calibrationMessage"></div>
+                <div id="cameraSelectContainer">
+                    <label for="cameraSelect">Select Camera: </label>
+                    <select id="cameraSelect"></select>
+                </div>
+            </main>
+        </section>
+
+        <!-- Completion Page -->
+        <section id="completionPage" class="page">
+            <header>
+                <h1>Thank You!</h1>
+            </header>
+            <main>
+                <p>The session has ended. Thank you for participating in the Eye Movement Data Collection project.</p>
+            </main>
+        </section>
+
         <footer>
             <p>&copy; 2024 Eye Movement Research</p>
         </footer>
     </div>
+
+    <script>
+        // JavaScript for page navigation and form handling
+        document.getElementById('startBtn').addEventListener('click', () => {
+            navigateToPage('userInfoPage');
+        });
+
+        document.getElementById('userInfoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const age = document.getElementById('age').value;
+            const healthCondition = document.getElementById('healthCondition').value.toLowerCase();
+
+            if (age < 50 || healthCondition.includes('cataracts') || healthCondition.includes('glaucoma')) {
+                document.getElementById('eligibilityMessage').innerText = 'Unfortunately, you are not eligible for this study.';
+            } else {
+                navigateToPage('instructionsPage');
+            }
+        });
+
+        document.getElementById('proceedToTracking').addEventListener('click', () => {
+            navigateToPage('trackingPage');
+            startCalibration();
+        });
+
+        function navigateToPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function startCalibration() {
+            // Begin the eye-tracking calibration and data collection process here
+            // Setup camera and start tracking as per your existing JavaScript code
+        }
+    </script>
 </body>
 </html>
