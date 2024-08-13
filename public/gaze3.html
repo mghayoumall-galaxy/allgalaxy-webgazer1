@@ -52,5 +52,126 @@
             <p>&copy; 2024 Eye Movement Research</p>
         </footer>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cameraSelect = document.getElementById('cameraSelect');
+            const startCalibrationButton = document.getElementById('startCalibrationButton');
+            const trackingInfo = document.getElementById('tracking-info');
+            const calibrationDiv = document.getElementById('calibrationDiv');
+            const calibrationMessage = document.getElementById('calibrationMessage');
+            const webcamVideo = document.getElementById('webcamVideo');
+            const demoImage = document.getElementById('demoImage');
+            const gazeDataDiv = document.getElementById('gazeData');
+            let currentImageIndex = 0;
+
+            async function populateCameraSelect() {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoInputs = devices.filter(device => device.kind === 'videoinput');
+
+                    cameraSelect.innerHTML = ''; // Clear previous options
+                    videoInputs.forEach((input, index) => {
+                        const option = document.createElement('option');
+                        option.value = input.deviceId;
+                        option.text = input.label || `Camera ${index + 1}`;
+                        cameraSelect.appendChild(option);
+                    });
+
+                    if (videoInputs.length > 0) {
+                        startCalibrationButton.disabled = false; // Enable the button
+                    }
+                } catch (error) {
+                    console.error('Error fetching video input devices:', error);
+                }
+            }
+
+            startCalibrationButton.addEventListener('click', function() {
+                const selectedCamera = cameraSelect.value;
+
+                if (selectedCamera) {
+                    trackingInfo.style.display = 'block'; // Show the tracking info section
+                    calibrationDiv.style.display = 'flex'; // Start the calibration process
+                    setupCamera(selectedCamera); // Initialize the camera
+                }
+            });
+
+            async function setupCamera(deviceId) {
+                if (webcamVideo.srcObject) {
+                    webcamVideo.srcObject.getTracks().forEach(track => track.stop());
+                }
+
+                try {
+                    const constraints = {
+                        video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+                    };
+
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    webcamVideo.srcObject = stream;
+                    webcamVideo.play();
+                    console.log('Camera is now active.');
+                    startCalibration(); // Start calibration immediately after the camera is active
+                } catch (error) {
+                    console.error('Error accessing the camera:', error);
+                    alert('Unable to access the camera. Please ensure permissions are granted.');
+                }
+            }
+
+            function startCalibration() {
+                calibrationDiv.style.display = 'flex';
+                const calibrationPoints = document.getElementsByClassName('calibrationPoint');
+                showCalibrationPoint(0); // Start from the first calibration point
+            }
+
+            function showCalibrationPoint(index) {
+                const calibrationPoints = document.getElementsByClassName('calibrationPoint');
+                if (index < calibrationPoints.length) {
+                    const point = calibrationPoints[index];
+                    point.style.visibility = 'visible';
+
+                    setTimeout(() => {
+                        point.style.visibility = 'hidden';
+                        showCalibrationPoint(index + 1); // Move to the next point
+                    }, 2000); // Show each calibration point for 2 seconds
+                } else {
+                    calibrationDiv.style.display = 'none';
+                    calibrationMessage.innerText = 'Calibration complete. Starting gaze data collection...';
+                    startTracking();
+                }
+            }
+
+            function startTracking() {
+                webgazer.setGazeListener((data, timestamp) => {
+                    if (data) {
+                        const { x, y } = data;
+                        gazeDataDiv.innerText = `Gaze coordinates: X ${x.toFixed(2)}, Y ${y.toFixed(2)} at ${timestamp.toFixed(2)} ms`;
+                    }
+                }).begin();
+
+                demoImage.style.display = 'block';
+                demoImage.src = `images/image${currentImageIndex + 1}.jpg`;
+                setTimeout(showNextImage, 5000); // Display each image for 5 seconds
+            }
+
+            function showNextImage() {
+                currentImageIndex++;
+                if (currentImageIndex < 10) { // Assuming 10 images
+                    demoImage.src = `images/image${currentImageIndex + 1}.jpg`;
+                    setTimeout(showNextImage, 5000);
+                } else {
+                    endSession();
+                }
+            }
+
+            function endSession() {
+                webgazer.end();
+                demoImage.style.display = 'none';
+                gazeDataDiv.innerText = 'Thank you! The session has ended.';
+                console.log('Eye movement tracking stopped. Session ended.');
+            }
+
+            populateCameraSelect();
+        });
+    </script>
 </body>
 </html>
