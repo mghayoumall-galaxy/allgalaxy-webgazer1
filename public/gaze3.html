@@ -3,18 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instructions</title>
+    <title>Eye Movement Data Collection</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/webgazer"></script>
+    <script defer src="script.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Instructions</h1>
+            <h1>Eye Movement Data Collection</h1>
         </header>
         <main>
-            <p>Follow the instructions on the next screen to track your eye movements.</p>
-            <p>The process will take approximately 5 minutes.</p>
-            <button onclick="window.location.href='gaze.html'">Proceed to Tracking</button>
+            <section id="intro">
+                <p>Welcome to the Eye Movement Data Collection Demo. Follow the instructions below to start the tracking process.</p>
+                <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
+            </section>
+            <section id="tracking-info">
+                <div id="camera-frame">
+                    <video id="webcamVideo" autoplay playsinline></video>
+                </div>
+                <div id="image-frame-container">
+                    <div id="image-frame">
+                        <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;">
+                    </div>
+                    <div id="image-mask"></div>
+                </div>
+            </section>
+            <div id="gazeData">Waiting for gaze data...</div>
+            <div id="calibrationDiv" class="calibration">
+                <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
+                <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
+                <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
+                <div class="calibrationPoint" id="point4" style="top: 50%; left: 10%;"></div>
+                <div class="calibrationPoint" id="point5" style="top: 50%; left: 50%;"></div>
+                <div class="calibrationPoint" id="point6" style="top: 50%; left: 90%;"></div>
+                <div class="calibrationPoint" id="point7" style="top: 90%; left: 10%;"></div>
+                <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
+                <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
+            </div>
+            <div id="calibrationMessage"></div>
+            <div id="cameraSelectContainer">
+                <label for="cameraSelect">Select Camera: </label>
+                <select id="cameraSelect"></select>
+            </div>
         </main>
         <footer>
             <p>&copy; 2024 Eye Movement Research</p>
