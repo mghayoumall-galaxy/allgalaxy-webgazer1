@@ -1,5 +1,5 @@
 window.onload = function() {
-    if (window.location.pathname.endsWith("gaze4.html")) {
+    if (window.location.pathname.endsWith("gaze3.html")) {
         
         const videoElement = document.getElementById('webcamVideo');
         const demoImage = document.getElementById('demoImage');
