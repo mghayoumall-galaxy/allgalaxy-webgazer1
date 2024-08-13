@@ -3,98 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eye and Facial Tracking Demo</title>
+    <title>Welcome - Eye Tracking Demo</title>
     <link rel="stylesheet" href="style.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/webgazer"></script>
-    <script defer src="script.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Eye and Facial Tracking Demo</h1>
+            <h1>Welcome to the Eye Tracking Demo</h1>
         </header>
         <main>
-            <section id="intro">
-                <p>Welcome to the Eye and Facial Tracking Demo. Please follow the instructions below to start the tracking process.</p>
-                <p>First, select your camera from the dropdown list. After selecting the camera, the calibration process will start. Once calibration is complete, instructions will be provided to follow specific objects in the images.</p>
-            </section>
-            <div>
-                <label for="cameraSelect">Select Camera: </label>
-                <select id="cameraSelect"></select>
-                <button id="startCalibrationButton" disabled>Start Calibration</button>
-            </div>
-            <div id="tracking-info" style="display: none;">
-                <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video>
-                </div>
-                <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;">
-                </div>
-            </div>
-            <div id="gazeData">Waiting for gaze data...</div>
-            <div id="calibrationDiv" class="calibration">
-                <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
-                <div class="calibrationPoint" id="point4" style="top: 50%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point5" style="top: 50%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point6" style="top: 50%; left: 90%;"></div>
-                <div class="calibrationPoint" id="point7" style="top: 90%; left: 10%;"></div>
-                <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
-                <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
-            </div>
-            <div id="calibrationCompleteMessage" style="display: none;">
-                <p>Calibration complete. Starting gaze data collection...</p>
-            </div>
+            <p>This demo will guide you through the process of eye and facial tracking. Please ensure your webcam is ready.</p>
+            <p>Click the button below to start the demonstration.</p>
+            <button onclick="window.location.href='gaze1.html'">Start Demonstration</button>
         </main>
         <footer>
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cameraSelect = document.getElementById('cameraSelect');
-            const startCalibrationButton = document.getElementById('startCalibrationButton');
-            const trackingInfo = document.getElementById('tracking-info');
-            const calibrationDiv = document.getElementById('calibrationDiv');
-            const calibrationCompleteMessage = document.getElementById('calibrationCompleteMessage');
-
-            async function populateCameraSelect() {
-                try {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    const videoInputs = devices.filter(device => device.kind === 'videoinput');
-
-                    cameraSelect.innerHTML = ''; // Clear previous options
-                    videoInputs.forEach((input, index) => {
-                        const option = document.createElement('option');
-                        option.value = input.deviceId;
-                        option.text = input.label || `Camera ${index + 1}`;
-                        cameraSelect.appendChild(option);
-                    });
-
-                    if (videoInputs.length > 0) {
-                        startCalibrationButton.disabled = false; // Enable the start button if cameras are available
-                    }
-                } catch (error) {
-                    console.error('Error fetching video input devices:', error);
-                }
-            }
-
-            startCalibrationButton.addEventListener('click', function() {
-                const selectedCamera = cameraSelect.value;
-
-                if (selectedCamera) {
-                    trackingInfo.style.display = 'block'; // Show the tracking info section
-                    calibrationDiv.style.display = 'flex'; // Start the calibration process
-                    // Add the code to initialize the camera and start calibration here
-                }
-            });
-
-            populateCameraSelect();
-        });
-    </script>
 </body>
 </html>

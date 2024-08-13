@@ -19,7 +19,16 @@
                 <p>Welcome to the Eye Movement Data Collection Demo. Follow the instructions below to start the tracking process.</p>
                 <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
             </section>
-            <section id="tracking-info">
+            
+            <!-- Camera Selection and Calibration -->
+            <div id="cameraSelectContainer">
+                <label for="cameraSelect">Select Camera: </label>
+                <select id="cameraSelect"></select>
+                <button id="startCalibrationButton">Start Calibration</button>
+            </div>
+
+            <!-- Tracking Information and Video Feed -->
+            <section id="tracking-info" style="display:none;">
                 <div id="camera-frame">
                     <video id="webcamVideo" autoplay playsinline></video>
                 </div>
@@ -30,8 +39,12 @@
                     <div id="image-mask"></div>
                 </div>
             </section>
+            
+            <!-- Gaze Data Display -->
             <div id="gazeData">Waiting for gaze data...</div>
-            <div id="calibrationDiv" class="calibration">
+            
+            <!-- Calibration Points -->
+            <div id="calibrationDiv" class="calibration" style="display:none;">
                 <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
                 <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
@@ -42,12 +55,7 @@
                 <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
             </div>
-            <div id="calibrationMessage"></div>
-            <div id="cameraSelectContainer">
-                <label for="cameraSelect">Select Camera: </label>
-                <select id="cameraSelect"></select>
-                <button id="startCalibrationButton">Start Calibration</button>
-            </div>
+            <div id="calibrationMessage" style="display:none;"></div>
         </main>
         <footer>
             <p>&copy; 2024 Eye Movement Research</p>
