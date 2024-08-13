@@ -27,15 +27,14 @@
             </div>
             <div id="tracking-info" style="display: none;">
                 <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video> <!-- Web camera feed -->
+                    <video id="webcamVideo" autoplay playsinline></video>
                 </div>
                 <div id="image-frame">
-                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;"> <!-- Placeholder for demo image -->
+                    <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;">
                 </div>
             </div>
             <div id="gazeData">Waiting for gaze data...</div>
             <div id="calibrationDiv" class="calibration">
-                <!-- Calibration points positioned across the viewport -->
                 <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
                 <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
@@ -54,29 +53,48 @@
             <p>&copy; 2024 AllGalaxy</p>
         </footer>
     </div>
-</body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Eye Movement Data Collection</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Welcome to the Eye Movement Data Collection Project</h1>
-        </header>
-        <main>
-            <p>This project aims to collect data on eye movement patterns to better understand and diagnose various conditions.</p>
-            <p>Please click the button below to begin.</p>
-            <button onclick="window.location.href='gaze2.html'">Start</button>
-        </main>
-        <footer>
-            <p>&copy; 2024 Eye Movement Research</p>
-        </footer>
-    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cameraSelect = document.getElementById('cameraSelect');
+            const startCalibrationButton = document.getElementById('startCalibrationButton');
+            const trackingInfo = document.getElementById('tracking-info');
+            const calibrationDiv = document.getElementById('calibrationDiv');
+            const calibrationCompleteMessage = document.getElementById('calibrationCompleteMessage');
+
+            async function populateCameraSelect() {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoInputs = devices.filter(device => device.kind === 'videoinput');
+
+                    cameraSelect.innerHTML = ''; // Clear previous options
+                    videoInputs.forEach((input, index) => {
+                        const option = document.createElement('option');
+                        option.value = input.deviceId;
+                        option.text = input.label || `Camera ${index + 1}`;
+                        cameraSelect.appendChild(option);
+                    });
+
+                    if (videoInputs.length > 0) {
+                        startCalibrationButton.disabled = false; // Enable the start button if cameras are available
+                    }
+                } catch (error) {
+                    console.error('Error fetching video input devices:', error);
+                }
+            }
+
+            startCalibrationButton.addEventListener('click', function() {
+                const selectedCamera = cameraSelect.value;
+
+                if (selectedCamera) {
+                    trackingInfo.style.display = 'block'; // Show the tracking info section
+                    calibrationDiv.style.display = 'flex'; // Start the calibration process
+                    // Add the code to initialize the camera and start calibration here
+                }
+            });
+
+            populateCameraSelect();
+        });
+    </script>
 </body>
 </html>
-
