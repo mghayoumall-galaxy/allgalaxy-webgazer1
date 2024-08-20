@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Movement Data Collection</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/webgazer"></script>
+    <script defer src="script.js"></script>
+    <style>
+        /* Basic Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1c1e24;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: #2a2d37;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header Styling */
+        header {
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #61dafb;
+        }
+
+        /* Main Content Styling */
+        #camera-frame {
+            margin-top: 20px;
+        }
+
+        #webcamVideo {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #image-frame-container {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #image-frame {
+            width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+
+        #demoImage {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #gazeData {
+            margin-top: 20px;
+            color: #61dafb;
+        }
+
+        /* Footer Styling */
+        footer {
+            margin-top: 30px;
+            background: #2a2d37;
+            color: #777;
+            padding: 20px;
+            border-radius: 0 0 15px 15px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Eye Movement Data Collection</h1>
+        </header>
+        <main>
+            <section id="intro">
+                <p>Welcome to the Eye Movement Data Collection Demo. Follow the instructions below to start the tracking process.</p>
+                <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
+            </section>
+
+            <!-- Tracking Information and Video Feed -->
+            <section id="tracking-info">
+                <div id="camera-frame">
+                    <video id="webcamVideo" autoplay playsinline></video>
+                </div>
+                <div id="image-frame-container">
+                    <div id="image-frame">
+                        <img id="demoImage" src="images/image1.jpg" alt="Demo Image">
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Gaze Data Display -->
+            <div id="gazeData">Waiting for gaze data...</div>
+        </main>
+        <footer>
+            <p>&copy; 2024 Eye Movement Research</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoImage = document.getElementById('demoImage');
+            let currentImageIndex = 1;
+            const totalImages = 10;
+
+            // Initialize WebGazer and set up the webcam feed
+            webgazer.setGazeListener(function(data, elapsedTime) {
+                if (data == null) {
+                    return;
+                }
+                const xprediction = data.x;
+                const yprediction = data.y;
+                document.getElementById('gazeData').innerText = `X: ${xprediction.toFixed(2)}, Y: ${yprediction.toFixed(2)}`;
+            }).begin();
+
+            webgazer.showVideoPreview(true) // Show the video preview in the video element
+                .setVideoElement(document.getElementById('webcamVideo')); // Set the video element for the webcam
+
+            startImageSequence();
+
+            function startImageSequence() {
+                showImage();
+                const imageInterval = setInterval(() => {
+                    currentImageIndex++;
+                    if (currentImageIndex > totalImages) {
+                        clearInterval(imageInterval);
+                        demoImage.style.display = 'none';
+                        document.getElementById('intro').textContent = 'Data collection complete. Thank you!';
+                        webgazer.end(); // Stop WebGazer tracking when done
+                        return;
+                    }
+                    showImage();
+                }, 10000); // Show each image for 10 seconds
+            }
+
+            function showImage() {
+                demoImage.src = `images/image${currentImageIndex}.jpg`;
+                demoImage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

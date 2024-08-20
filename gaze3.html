@@ -1,53 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eye Movement Data Collection</title>
+    <title>Calibration - Eye Movement Data Collection</title>
     <link rel="stylesheet" href="style.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/webgazer"></script>
-    <script defer src="script.js"></script>
+    <style>
+        /* Basic Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1c1e24;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container */
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #2a2d37;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header Styling */
+        header {
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #61dafb;
+        }
+
+        /* Calibration Points */
+        .calibrationPoint {
+            width: 15px;
+            height: 15px;
+            background-color: #ff6584;
+            border-radius: 50%;
+            position: absolute;
+            visibility: hidden;
+        }
+
+        /* Calibration Message */
+        #calibrationMessage {
+            margin-top: 20px;
+            color: #61dafb;
+            font-size: 1.2em;
+        }
+
+        /* Footer Styling */
+        footer {
+            margin-top: 30px;
+            background: #2a2d37;
+            color: #777;
+            padding: 20px;
+            border-radius: 0 0 15px 15px;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>Eye Movement Data Collection</h1>
+            <h1>Calibration</h1>
         </header>
         <main>
-            <section id="intro">
-                <p>Welcome to the Eye Movement Data Collection Demo. Follow the instructions below to start the tracking process.</p>
-                <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
-            </section>
-
-            <!-- Error Message Placeholder -->
-            <div id="errorMessage" style="color: red; display: none;"></div>
-
-            <!-- Camera Selection and Calibration -->
-            <div id="cameraSelectContainer">
-                <label for="cameraSelect">Select Camera: </label>
-                <select id="cameraSelect"></select>
-                <button id="startCalibrationButton">Start Calibration</button>
-            </div>
-
-            <!-- Tracking Information and Video Feed -->
-            <section id="tracking-info" style="display:none;">
-                <div id="camera-frame">
-                    <video id="webcamVideo" autoplay playsinline></video>
-                </div>
-                <div id="image-frame-container">
-                    <div id="image-frame">
-                        <img id="demoImage" src="images/image1.jpg" alt="Demo Image" style="display: none;">
-                    </div>
-                    <div id="image-mask"></div>
-                </div>
-            </section>
-            
-            <!-- Gaze Data Display -->
-            <div id="gazeData">Waiting for gaze data...</div>
+            <div id="calibrationMessage">Please follow the red dots on the screen to calibrate.</div>
             
             <!-- Calibration Points -->
-            <div id="calibrationDiv" class="calibration" style="display:none;">
+            <div id="calibrationDiv" class="calibration">
                 <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
                 <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
@@ -58,13 +93,45 @@
                 <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
             </div>
-
-            <!-- Calibration Message -->
-            <div id="calibrationMessage" style="display:none;"></div>
         </main>
         <footer>
             <p>&copy; 2024 Eye Movement Research</p>
         </footer>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calibrationPoints = document.querySelectorAll('.calibrationPoint');
+            const calibrationMessage = document.getElementById('calibrationMessage');
+            const calibrationDiv = document.getElementById('calibrationDiv');
+
+            startCalibration();
+
+            function startCalibration() {
+                showCalibrationPoint(0);
+            }
+
+            function showCalibrationPoint(index) {
+                if (index >= calibrationPoints.length) {
+                    finishCalibration();
+                    return;
+                }
+
+                calibrationPoints[index].style.visibility = 'visible';
+                setTimeout(() => {
+                    calibrationPoints[index].style.visibility = 'hidden';
+                    showCalibrationPoint(index + 1);
+                }, 1000);
+            }
+
+            function finishCalibration() {
+                calibrationMessage.textContent = 'Calibration complete. Redirecting...';
+                setTimeout(() => {
+                    window.location.href = 'gaze4.html'; // Redirect to the next page after calibration
+                }, 2000);
+            }
+        });
+    </script>
 </body>
+
 </html>

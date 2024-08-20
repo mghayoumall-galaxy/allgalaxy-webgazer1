@@ -1,73 +1,101 @@
-body, h1, p, div, img, video {
+/* Basic Reset */
+body, h1, h2, p, div, img, video {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Body Styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #282c34;
+    background-color: #1c1e24; /* Dark, modern background color */
+    color: #ffffff; /* White text for readability */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    color: #ffffff;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
 }
 
+/* Container Styling */
 .container {
     width: 90%;
     max-width: 800px;
-    height: 100%;
-    background: #3a3f4b;
-    border-radius: 20px;
+    background: #2a2d37; /* Slightly lighter background for contrast */
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Strong shadow for more defined box */
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    min-height: 80vh; /* Ensures the container has a substantial height */
 }
 
+/* Header Styling */
 header {
-    background: #61dafb;
-    color: #282c34;
-    padding: 20px;
     width: 100%;
-    border-radius: 15px 15px 0 0;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.logo {
+    width: 120px;
+    margin-bottom: 20px;
 }
 
 header h1 {
-    margin: 0;
-    font-size: 2.2em;
-    font-weight: bold;
+    font-size: 2.5em;
+    font-weight: 700;
     letter-spacing: 1px;
+    color: #61dafb;
 }
 
+/* Main Content Styling */
 main {
     width: 100%;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
-#intro {
+.intro h2 {
+    font-size: 2em;
     margin-bottom: 20px;
-    font-size: 1em;
-    color: #a8aab3;
-    font-weight: 300;
+    color: #61dafb;
 }
 
-#tracking-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+.intro p {
+    font-size: 1.2em;
+    line-height: 1.6;
+    color: #d1d1d1;
+    margin-bottom: 25px;
 }
 
+/* Call-to-Action (CTA) Styling */
+.cta {
+    margin-top: 30px;
+}
+
+.cta button {
+    padding: 15px 40px;
+    border: none;
+    border-radius: 5px;
+    background-color: #61dafb;
+    color: #1c1e24;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.cta button:hover {
+    background-color: #21a1c4;
+    transform: translateY(-2px);
+}
+
+/* Camera and Image Frames */
 #camera-frame, #image-frame {
     margin: 15px 0;
     padding: 12px;
@@ -75,8 +103,8 @@ main {
     border: 3px solid #61dafb;
     border-radius: 15px;
     width: 100%;
-    max-width: 600px; /* Larger width for a more balanced design */
-    height: 350px; /* Fixed height for images */
+    max-width: 600px;
+    height: 350px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -90,6 +118,7 @@ main {
     object-fit: cover;
 }
 
+/* Gaze Data Display */
 #gazeData {
     padding: 10px;
     background-color: #3a3f4b;
@@ -107,11 +136,12 @@ main {
 #demoImage {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Ensure the entire image fits within the frame */
+    object-fit: contain;
     border-radius: 15px;
-    display: block; /* Make sure the image is displayed */
+    display: block;
 }
 
+/* Calibration Points */
 #calibrationDiv {
     position: absolute;
     width: 100%;
@@ -133,10 +163,12 @@ main {
     visibility: hidden;
 }
 
+/* Camera Select Container */
 #cameraSelectContainer {
     margin-top: 10px;
 }
 
+/* Button and Select Styling */
 button, select {
     cursor: pointer;
     padding: 10px 20px;
@@ -169,17 +201,36 @@ button:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(97, 218, 251, 0.5);
 }
 
+/* Footer Styling */
 footer {
-    background: #61dafb;
-    color: #282c34;
-    text-align: center;
-    padding: 15px;
     width: 100%;
+    background: #2a2d37;
+    color: #777;
+    text-align: center;
+    padding: 20px;
     border-radius: 0 0 15px 15px;
-}
-
-footer p {
-    margin: 0;
     font-size: 0.9em;
     letter-spacing: 0.5px;
+    margin-top: 30px;
+}
+
+/* Ensure the page looks good on all devices */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    .intro h2 {
+        font-size: 1.8em;
+    }
+
+    .cta button {
+        padding: 12px 30px;
+        font-size: 1em;
+    }
 }
