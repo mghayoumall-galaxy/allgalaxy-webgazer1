@@ -105,8 +105,18 @@
                 <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
             </section>
 
+            <!-- Error Message Placeholder -->
+            <div id="errorMessage" style="color: red; display: none;"></div>
+
+            <!-- Camera Selection -->
+            <div id="cameraSelectContainer">
+                <label for="cameraSelect">Select Camera: </label>
+                <select id="cameraSelect"></select>
+                <button id="startCalibrationButton">Start Tracking</button>
+            </div>
+
             <!-- Tracking Information and Video Feed -->
-            <section id="tracking-info">
+            <section id="tracking-info" style="display:none;">
                 <div id="camera-frame">
                     <video id="webcamVideo" autoplay playsinline></video>
                 </div>
@@ -127,24 +137,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const startCalibrationButton = document.getElementById('startCalibrationButton');
+            const trackingInfoSection = document.getElementById('tracking-info');
             const demoImage = document.getElementById('demoImage');
+
             let currentImageIndex = 1;
             const totalImages = 10;
 
-            // Initialize WebGazer and set up the webcam feed
-            webgazer.setGazeListener(function(data, elapsedTime) {
-                if (data == null) {
-                    return;
-                }
-                const xprediction = data.x;
-                const yprediction = data.y;
-                document.getElementById('gazeData').innerText = `X: ${xprediction.toFixed(2)}, Y: ${yprediction.toFixed(2)}`;
-            }).begin();
+            startCalibrationButton.addEventListener('click', startTracking);
 
-            webgazer.showVideoPreview(true) // Show the video preview in the video element
-                .setVideoElement(document.getElementById('webcamVideo')); // Set the video element for the webcam
-
-            startImageSequence();
+            function startTracking() {
+                startCalibrationButton.style.display = 'none';
+                trackingInfoSection.style.display = 'block';
+                startImageSequence();
+            }
 
             function startImageSequence() {
                 showImage();
@@ -153,8 +159,6 @@
                     if (currentImageIndex > totalImages) {
                         clearInterval(imageInterval);
                         demoImage.style.display = 'none';
-                        document.getElementById('intro').textContent = 'Data collection complete. Thank you!';
-                        webgazer.end(); // Stop WebGazer tracking when done
                         return;
                     }
                     showImage();

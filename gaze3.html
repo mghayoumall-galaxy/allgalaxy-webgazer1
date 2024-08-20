@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calibration - Eye Movement Data Collection</title>
+    <title>Eye Movement Data Collection</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/webgazer"></script>
+    <script defer src="script.js"></script>
     <style>
         /* Basic Reset */
         body, html {
@@ -24,7 +27,7 @@
         /* Container */
         .container {
             width: 90%;
-            max-width: 600px;
+            max-width: 800px;
             background: #2a2d37;
             border-radius: 15px;
             padding: 30px;
@@ -41,6 +44,41 @@
             font-size: 2em;
             font-weight: 700;
             letter-spacing: 1px;
+            color: #61dafb;
+        }
+
+        /* Main Content Styling */
+        #camera-frame {
+            margin-top: 20px;
+        }
+
+        #webcamVideo {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #image-frame-container {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #image-frame {
+            width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+
+        #demoImage {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #gazeData {
+            margin-top: 20px;
             color: #61dafb;
         }
 
@@ -76,13 +114,41 @@
 <body>
     <div class="container">
         <header>
-            <h1>Calibration</h1>
+            <h1>Eye Movement Data Collection</h1>
         </header>
         <main>
-            <div id="calibrationMessage">Please follow the red dots on the screen to calibrate.</div>
+            <section id="intro">
+                <p>Welcome to the Eye Movement Data Collection Demo. Follow the instructions below to start the tracking process.</p>
+                <p>When prompted, follow the objects in the images shown below. Your gaze patterns will be recorded for analysis.</p>
+            </section>
+
+            <!-- Error Message Placeholder -->
+            <div id="errorMessage" style="color: red; display: none;"></div>
+
+            <!-- Camera Selection and Calibration -->
+            <div id="cameraSelectContainer">
+                <label for="cameraSelect">Select Camera: </label>
+                <select id="cameraSelect"></select>
+                <button id="startCalibrationButton">Start Calibration</button>
+            </div>
+
+            <!-- Tracking Information and Video Feed -->
+            <section id="tracking-info" style="display:none;">
+                <div id="camera-frame">
+                    <video id="webcamVideo" autoplay playsinline></video>
+                </div>
+                <div id="image-frame-container">
+                    <div id="image-frame">
+                        <img id="demoImage" src="images/image1.jpg" alt="Demo Image">
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Gaze Data Display -->
+            <div id="gazeData">Waiting for gaze data...</div>
             
             <!-- Calibration Points -->
-            <div id="calibrationDiv" class="calibration">
+            <div id="calibrationDiv" class="calibration" style="display:none;">
                 <div class="calibrationPoint" id="point1" style="top: 10%; left: 10%;"></div>
                 <div class="calibrationPoint" id="point2" style="top: 10%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point3" style="top: 10%; left: 90%;"></div>
@@ -93,6 +159,9 @@
                 <div class="calibrationPoint" id="point8" style="top: 90%; left: 50%;"></div>
                 <div class="calibrationPoint" id="point9" style="top: 90%; left: 90%;"></div>
             </div>
+
+            <!-- Calibration Message -->
+            <div id="calibrationMessage" style="display:none;">Calibration in progress. Please follow the red dots on the screen.</div>
         </main>
         <footer>
             <p>&copy; 2024 Eye Movement Research</p>
@@ -102,12 +171,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const calibrationPoints = document.querySelectorAll('.calibrationPoint');
-            const calibrationMessage = document.getElementById('calibrationMessage');
+            const startCalibrationButton = document.getElementById('startCalibrationButton');
             const calibrationDiv = document.getElementById('calibrationDiv');
+            const calibrationMessage = document.getElementById('calibrationMessage');
+            const trackingInfoSection = document.getElementById('tracking-info');
+            const demoImage = document.getElementById('demoImage');
 
-            startCalibration();
+            let currentImageIndex = 1;
+            const totalImages = 10;
+
+            startCalibrationButton.addEventListener('click', startCalibration);
 
             function startCalibration() {
+                startCalibrationButton.style.display = 'none';
+                calibrationMessage.style.display = 'block';
+                calibrationDiv.style.display = 'block';
                 showCalibrationPoint(0);
             }
 
@@ -125,10 +203,29 @@
             }
 
             function finishCalibration() {
-                calibrationMessage.textContent = 'Calibration complete. Redirecting...';
-                setTimeout(() => {
-                    window.location.href = 'gaze4.html'; // Redirect to the next page after calibration
-                }, 2000);
+                calibrationMessage.textContent = 'Calibration complete. Starting image sequence...';
+                calibrationDiv.style.display = 'none';
+                trackingInfoSection.style.display = 'block';
+                startImageSequence();
+            }
+
+            function startImageSequence() {
+                showImage();
+                const imageInterval = setInterval(() => {
+                    currentImageIndex++;
+                    if (currentImageIndex > totalImages) {
+                        clearInterval(imageInterval);
+                        demoImage.style.display = 'none';
+                        calibrationMessage.textContent = 'Data collection complete. Thank you!';
+                        return;
+                    }
+                    showImage();
+                }, 10000); // Show each image for 10 seconds
+            }
+
+            function showImage() {
+                demoImage.src = `images/image${currentImageIndex}.jpg`;
+                demoImage.style.display = 'block';
             }
         });
     </script>
